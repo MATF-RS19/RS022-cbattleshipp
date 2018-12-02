@@ -2,42 +2,35 @@
 #include "playerthread.h"
 
 #include <QDebug>
+#include <QList>
 #include <QNetworkInterface>
 
 GameServer::GameServer(QObject *parent)
-    : QTcpServer (parent)
+    : QTcpServer(parent)
 {
-    openSession();
-}
-
-void GameServer::incomingConnection(qintptr socketDescriptor)
-{
-    PlayerThread *thread = new PlayerThread(socketDescriptor, this);
-    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-    thread->start();
-}
-
-
-void GameServer::openSession()
-{
-
-    if (!this->listen()) {
+    if (!this->listen(QHostAddress::AnyIPv4, GAME_PORT)) {
         qDebug() << "$ Server could not start";
-        return;
+        exit(EXIT_FAILURE);
     }
 
-    QHostAddress ipAddress;
-    QList<QHostAddress> ipAddressesList = QNetworkInterface::allAddresses();
+    QString ipAddress;
+    QList<QHostAddress> ipList = QNetworkInterface::allAddresses();
 
-    // get the first non-localhost IPv4 address
-    for (int i = 0; i < ipAddressesList.size(); ++i) {
-        if (ipAddressesList.at(i) != QHostAddress::LocalHost &&
-            ipAddressesList.at(i).toIPv4Address()) {
-            ipAddress = ipAddressesList.at(i);
+    for (int i = 0, n = ipList.size(); i < n; i++) {
+        if (ipList.at(i) != QHostAddress::LocalHost && ipList.at(i).toIPv4Address()) {
+            ipAddress = ipList.at(i).toString();
             break;
         }
     }
 
-    qDebug() << "$ Server IP adress " << ipAddress.toString();
-    qDebug() << "$ The server is running on port " << this->serverPort();
+   qDebug() << "$ Server IP address" << ipAddress;
+}
+
+void GameServer::incomingConnection(qintptr socketDescriptor)
+{
+    PlayerThread *player = new PlayerThread(this, socketDescriptor);
+
+    connect(player, SIGNAL(finished()), player, SLOT(deleteLater()));
+
+    player->start();
 }

@@ -1,23 +1,21 @@
-#ifndef PLAYERTHREAD_H_
-#define PLAYERTHREAD_H_
+#ifndef PLAYERTHREAD_H
+#define PLAYERTHREAD_H
 
+#include <QObject>
 #include <QThread>
-#include <QTcpSocket>
-#include <QDebug>
 
-class PlayerThread : public QThread {
+class PlayerThread : public QThread
+{
     Q_OBJECT
 
 public:
-    PlayerThread(qintptr socketDescriptor, QObject *parent);
+    PlayerThread(QObject *parent = nullptr, qintptr socketDescriptor = 0);
 
-    void run() override;
-
-signals:
-    void error(QTcpSocket::SocketError socketError);
+protected:
+    void run();
 
 private:
-    qintptr socketDescriptor;
+    qintptr m_socketDescriptor;
 };
 
-#endif // PLAYERTHREAD_H_
+#endif // PLAYERTHREAD_H

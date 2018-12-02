@@ -1,12 +1,12 @@
-#include <QCoreApplication>
-
 #include "gameserver.h"
+
+#include <QCoreApplication>
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication app(argc, argv);
+    QCoreApplication a(argc, argv);
 
     GameServer server;
 
-    return app.exec();
+    return a.exec();
 }

@@ -1,19 +1,21 @@
-#ifndef GAMESERVER_H_
-#define GAMESERVER_H_
+#ifndef GAMESERVER_H
+#define GAMESERVER_H
 
+#include <QObject>
 #include <QTcpServer>
 
-class GameServer : public QTcpServer {
+#define GAME_PORT 5050
+
+class GameServer : public QTcpServer
+{
     Q_OBJECT
 
 public:
     GameServer(QObject *parent = nullptr);
 
 protected:
-    void incomingConnection(qintptr socketDescriptor) override;
+    void incomingConnection(qintptr socketDescriptor);
 
-private slots:
-    void openSession();
 };
 
-#endif // GAMESERVER_H_
+#endif // GAMESERVER_H

@@ -1,19 +1,22 @@
 #include "playerthread.h"
 
-PlayerThread::PlayerThread(qintptr socketDescriptor, QObject *parent)
-    : QThread(parent), socketDescriptor(socketDescriptor)
+#include <QTcpSocket>
+
+PlayerThread::PlayerThread(QObject *parent, qintptr socketDescriptor)
+    : QThread(parent),
+      m_socketDescriptor(socketDescriptor)
 {
 }
 
 void PlayerThread::run()
 {
-    QTcpSocket tcpSocket;
-    if (!tcpSocket.setSocketDescriptor(socketDescriptor)) {
-        emit error(tcpSocket.error());
+    QTcpSocket socket;
+    if (!socket.setSocketDescriptor(m_socketDescriptor)) {
         return;
     }
 
-    qDebug() << "$ Hello from client thread!";
+    qDebug() << "$ What shall I do now?";
 
-    tcpSocket.disconnectFromHost();
+    QThread::exec();
+
 }
