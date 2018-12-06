@@ -4,18 +4,22 @@
 #include <QObject>
 #include <QTcpSocket>
 
-#define GAME_PORT 5050
-
 class Player : public QObject
 {
     Q_OBJECT
+
 public:
     explicit Player(QObject *parent = nullptr);
 
-    bool connectToHost(QString ipAddress);
+    QTcpSocket *socket() const;
+    void socket(QTcpSocket *socket);
 
-private:
-   QTcpSocket *m_socket;
+    QString name() const;
+    void name(const QString &name);
+
+protected:
+    QTcpSocket *m_socket;
+    QString m_name;
 };
 
 #endif // PLAYER_H
