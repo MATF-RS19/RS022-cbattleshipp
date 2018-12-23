@@ -2,24 +2,32 @@
 #define PLAYER_H
 
 #include <QObject>
+#include <QString>
 #include <QTcpSocket>
+
+#include <memory>
 
 class Player : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit Player(QObject *parent = nullptr);
+    explicit Player(QObject *parent = nullptr,
+                    std::unique_ptr<QTcpSocket> && socket = nullptr);
 
-    QTcpSocket *socket() const;
-    void socket(QTcpSocket *socket);
+    Player(Player && other);
 
+    void name(const QString & playerName);
     QString name() const;
-    void name(const QString &name);
 
-protected:
-    QTcpSocket *m_socket;
+private:
+    std::unique_ptr<QTcpSocket> m_socket;
     QString m_name;
+
+    char m_playerId;
+
+    friend class GameServer;
+    friend class GameManager;
 };
 
 #endif // PLAYER_H

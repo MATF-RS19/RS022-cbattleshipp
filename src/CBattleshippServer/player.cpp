@@ -1,25 +1,22 @@
 #include "player.h"
 
-Player::Player(QObject *parent) : QObject(parent)
-{
-}
+Player::Player(QObject *parent, std::unique_ptr<QTcpSocket> && socket)
+    : QObject(parent),
+      m_socket(std::move(socket)),
+      m_name("Guest")
+{}
 
-QTcpSocket *Player::socket() const
-{
-    return m_socket;
-}
+Player::Player(Player &&other)
+    : m_socket(std::move(other.m_socket)),
+      m_name(std::move(other.m_name))
+{}
 
-void Player::socket(QTcpSocket *socket)
+void Player::name(const QString & playerName)
 {
-    m_socket = socket;
+    m_name = QString(playerName);
 }
 
 QString Player::name() const
 {
-    return m_name;
-}
-
-void Player::name(const QString &name)
-{
-    m_name = name;
+   return m_name;
 }

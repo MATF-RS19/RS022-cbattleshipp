@@ -1,6 +1,8 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include <memory>
+
 #include <QObject>
 #include <QTcpSocket>
 
@@ -18,11 +20,14 @@ public:
     QString name() const;
     void name(const QString & name);
 
-public Q_SLOTS:
-
 private:
-    QTcpSocket *m_socket = nullptr;
+    std::unique_ptr<QTcpSocket> m_socket = nullptr;
     QString m_name;
+
+    QChar m_playerType;
+    uint16_t m_gameId;
+
+    friend class MainWindow;
 };
 
 #endif // PLAYER_H

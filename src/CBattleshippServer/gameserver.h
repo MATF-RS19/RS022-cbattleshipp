@@ -15,12 +15,15 @@ public:
 
     void startServer();
 
-public Q_SLOTS:
-    void handleRequest();
-    void sendStartMsg();
+Q_SIGNALS:
+    void log(const QString & msg);
+    void setIp(const QString & ip);
 
 protected:
-    void incomingConnection(qintptr socketDescriptor);
+    void incomingConnection(qintptr handle);
+
+private Q_SLOTS:
+    void handleRequest();
 
 private:
     GameManager m_gm;

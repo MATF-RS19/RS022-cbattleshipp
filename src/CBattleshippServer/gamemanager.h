@@ -1,10 +1,13 @@
 #ifndef GAMEMANAGER_H
 #define GAMEMANAGER_H
 
-#include <player.h>
+#include "player.h"
+#include "game.h"
+
+#include <vector>
+#include <memory>
 
 #include <QObject>
-#include <QTcpSocket>
 
 class GameManager : public QObject
 {
@@ -13,23 +16,18 @@ class GameManager : public QObject
 public:
     explicit GameManager(QObject *parent = nullptr);
 
-    QVector<Player *> players() const;
-
-    void addToPlayersList(Player *player);
-    void setPlayerName(qintptr socketDescriptor, QString & playerName);
-
-    Player *getPlayer1() const;
-    Player *getPlayer2() const;
-
-Q_SIGNALS:
-    void startGame();
+    void addToWaitingList(std::unique_ptr<Player> && player);
 
 private:
-    QVector<Player *> m_players;
-    QVector<QPair<Player *, Player *> > m_activeGameList;
-    qint32 m_numOfPlayers = 0;
+    std::vector<std::unique_ptr<Player>> m_waitingPlayers;
+    std::vector<Game> m_activeGames;
 
-    void createGame(Player* player1, Player* player2);
+    uint16_t m_playerCounter = 0;
+    uint16_t m_gameCounter = 0;
+
+    void startGame();
+
+    friend class GameServer;
 };
 
 #endif // GAMEMANAGER_H

@@ -1,49 +1,43 @@
 #include "gamemanager.h"
 
-GameManager::GameManager(QObject *parent) : QObject(parent)
+GameManager::GameManager(QObject *parent)
+    : QObject(parent)
+{}
+
+void GameManager::addToWaitingList(std::unique_ptr<Player> && player)
 {
+    m_playerCounter += 1;
+    m_waitingPlayers.push_back(std::move(player));
 }
 
-QVector<Player *> GameManager::players() const
+void GameManager::startGame()
 {
-    return m_players;
-}
+    m_gameCounter += 1;
 
-void GameManager::addToPlayersList(Player *player)
-{
-    m_players.push_back(player);
-    ++m_numOfPlayers;
+    // create new game
+    auto player1 = std::move(std::move(m_waitingPlayers[0]));
+    auto player2 = std::move(std::move(m_waitingPlayers[1]));
 
-    if (!(m_numOfPlayers % 2)) {
-        createGame(m_players.at(0), m_players.at(1));
-        m_players.pop_front();
-        m_players.pop_front();
-    }
-}
+    player1->m_playerId = 'a';
+    player2->m_playerId = 'b';
 
-void GameManager::setPlayerName(qintptr socketDescriptor, QString &playerName)
-{
-    for (int i = 0, n = m_players.size(); i < n; ++i) {
-        qDebug() << m_players.at(i)->socket()->socketDescriptor();
-        if (m_players.at(i)->socket()->socketDescriptor() == socketDescriptor) {
-            m_players.at(i)->name(playerName);
-            break;
-        }
-    }
-}
+    // send opponent name
+    player1->m_socket->write(QString("opp_name: " +
+                                     player2->m_name + " " +
+                                     player1->m_playerId +
+                                     m_gameCounter + "\n").toUtf8());
 
-Player *GameManager::getPlayer1() const
-{
-    return m_activeGameList[0].first;
-}
+    player2->m_socket->write(QString("opp_name: " +
+                                     player1->m_name + " " +
+                                     player2->m_playerId +
+                                     m_gameCounter + "\n").toUtf8());
 
-Player *GameManager::getPlayer2() const
-{
-    return m_activeGameList[0].second;
-}
+    Game game(nullptr, std::move(player1), std::move(player2));
 
-void GameManager::createGame(Player *player1, Player *player2)
-{
-    m_activeGameList.push_back(qMakePair(player1, player2));
-    emit startGame();
+    // remove first two joined players
+    m_playerCounter -= 2;
+    m_waitingPlayers.pop_back();
+    m_waitingPlayers.pop_back();
+
+    m_activeGames.push_back(std::move(game));
 }

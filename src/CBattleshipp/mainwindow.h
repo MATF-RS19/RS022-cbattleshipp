@@ -19,6 +19,8 @@ public:
 
 private Q_SLOTS:
     void onPlayClicked();
+    void onSendClicked();
+
     void recieveServerMsg();
 
 private:
