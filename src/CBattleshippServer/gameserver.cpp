@@ -39,7 +39,8 @@ void GameServer::incomingConnection(qintptr handle)
     player->m_socket = std::move(playerSocket);
     player->m_socket->setSocketDescriptor(handle);
 
-    QObject::connect(player->m_socket.get(), SIGNAL(readyRead()), this, SLOT(handleRequest()));
+    connect(player->m_socket.get(), SIGNAL(readyRead()), this, SLOT(handleRequest()));
+    connect(player->m_socket.get(), SIGNAL(disconnected()), this, SLOT(clientDisconnected()));
 
     m_gm.addToWaitingList(std::move(player));
 
@@ -66,19 +67,57 @@ void GameServer::handleRequest()
             return;
          }
 
-        /* FIXME: index out of range !!! = wrong message format
+         // TODO: serious refactoring!!!
         if (msg.contains("chat_msg:")) {
             QStringList request = msg.split(" ");
 
-            if (request[0][0] == 'a') {
-                m_gm.m_activeGames.at(request[0][1].unicode()).m_player2->m_socket->write(msg.toUtf8());
+            // qDebug() << msg;
+            // qDebug() << request[0];
+
+
+            if (!QString::compare(request[0], "a", Qt::CaseSensitivity::CaseInsensitive)) {
+                for (auto & game : m_gm.m_activeGames) {
+
+                    // qDebug() << "Hello there 1";
+                    // qDebug() << game.m_player1->m_name;
+                    // qDebug() << game.m_gameId;
+                    qDebug() << request;
+
+                    if (game.m_gameId == request[1].toInt()) {
+
+                        QString chatMsg = "chat_msg: [" + game.m_player1->m_name + "]: ";
+                        for (int i =3; i < request.size(); i++) {
+                            chatMsg.append(request[i]).append(" ");
+                        }
+
+                        game.m_player2->m_socket->write(QString(chatMsg + "\n").toUtf8());
+                        // qDebug() << "Hello there 2";
+                    }
+                }
             }
             else {
-                m_gm.m_activeGames.at(request[0][1].unicode()).m_player1->m_socket->write(msg.toUtf8());
+                for (auto & game : m_gm.m_activeGames)
+                    if (game.m_gameId == request[1].toInt()) {
+
+                        QString chatMsg = "chat_msg: [" + game.m_player2->m_name + "]: ";
+                        for (int i = 3; i < request.size(); i++) {
+                            chatMsg.append(request[i]).append(" ");
+                        }
+
+                        game.m_player1->m_socket->write(QString(chatMsg + "\n").toUtf8());
+                    }
             }
 
             return;
          }
-       */
     }
+}
+
+void GameServer::clientDisconnected()
+{
+    // TODO: send other player notification that opponent left
+    QTcpSocket *socket = static_cast<QTcpSocket*>(sender());
+
+    // delete later?
+    socket->close();
 }

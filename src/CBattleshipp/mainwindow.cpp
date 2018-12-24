@@ -3,7 +3,6 @@
 
 #include <QString>
 
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -44,11 +43,11 @@ void MainWindow::onSendClicked()
 {
     if (!ui->leTextMsg->text().isEmpty()) {
         // print message to you chat
-        ui->teChat->append(ui->leTextMsg->text());
+        ui->teChat->append(QString("[" + m_player.name() + "]: " + ui->leTextMsg->text()));
 
         // send message to other player
-        m_player.m_socket->write(QString(QString(m_player.m_playerType) +
-                                         QString(m_player.m_gameId) +
+        m_player.m_socket->write(QString(QString(m_player.m_playerType) + " " +
+                                         QString::number(m_player.m_gameId) +
                                          " chat_msg: " +
                                          ui->leTextMsg->text() + "\n").toUtf8());
 
@@ -68,8 +67,10 @@ void MainWindow::recieveServerMsg()
          if (msg.contains("opp_name:")) {
             QStringList request = msg.split(" ");
 
+            qDebug() << msg;
+
             m_player.m_playerType = request[2].at(0);
-            m_player.m_gameId = request[2].at(1).unicode();
+            m_player.m_gameId = request[3].toInt();
 
             ui->opponentBox->setTitle(request[1]);
             ui->teNotifications->append("Player " + request[1] + " joined!");
@@ -78,10 +79,17 @@ void MainWindow::recieveServerMsg()
             return;
          }
 
-         // NOTE: chat is not working on server side
+         // print opponent message
          if (msg.contains("chat_msg:")) {
-            // FIXME: change sending message format
-            ui->teChat->append(msg);
+            QStringList request = msg.split(" ");
+            QString chatMsg;
+
+            qDebug() << msg;
+
+            for (int i = 1; i < request.size(); i++)
+                chatMsg.append(request[i]).append(" ");
+
+            ui->teChat->append(chatMsg);
 
             return;
          }

@@ -24,6 +24,7 @@ protected:
 
 private Q_SLOTS:
     void handleRequest();
+    void clientDisconnected();
 
 private:
     GameManager m_gm;

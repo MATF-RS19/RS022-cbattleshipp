@@ -25,7 +25,7 @@ private:
     QString m_name;
 
     QChar m_playerType;
-    uint16_t m_gameId;
+    qint32 m_gameId;
 
     friend class MainWindow;
 };

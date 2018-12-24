@@ -24,7 +24,7 @@ private:
     std::unique_ptr<QTcpSocket> m_socket;
     QString m_name;
 
-    char m_playerId;
+    char m_playerType;
 
     friend class GameServer;
     friend class GameManager;
