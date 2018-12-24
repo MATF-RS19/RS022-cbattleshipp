@@ -11,6 +11,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->playButton, SIGNAL(clicked(bool)), this, SLOT(onPlayClicked()));
     connect(ui->sendButton, SIGNAL(clicked(bool)), this, SLOT(onSendClicked()));
+    connect(ui->boatSize2, SIGNAL(clicked(bool)), this, SLOT(setBoatSize2()));
+    connect(ui->boatSize3, SIGNAL(clicked(bool)), this, SLOT(setBoatSize3()));
+    connect(ui->boatSize4, SIGNAL(clicked(bool)), this, SLOT(setBoatSize4()));
+    connect(ui->boatSize5, SIGNAL(clicked(bool)), this, SLOT(setBoatSize5()));
 }
 
 MainWindow::~MainWindow()
@@ -20,6 +24,14 @@ MainWindow::~MainWindow()
 
 void MainWindow::onPlayClicked()
 {
+
+    for(int i = 0; i < 10; i++){
+        ui->tableWidget->setColumnWidth(i,32);
+        ui->tableWidget->setRowHeight(i,32);
+        ui->tableWidget_2->setColumnWidth(i,32);
+        ui->tableWidget_2->setRowHeight(i,32);
+        }
+
     m_player.name(ui->lePlayerName->text());
 
     if (m_player.connectToHost(ui->leServerIP->text())) {
@@ -39,6 +51,8 @@ void MainWindow::onPlayClicked()
 
 }
 
+
+
 void MainWindow::onSendClicked()
 {
     if (!ui->leTextMsg->text().isEmpty()) {
@@ -53,6 +67,30 @@ void MainWindow::onSendClicked()
 
         ui->leTextMsg->clear();
     }
+}
+
+void MainWindow::setBoatSize2()
+{
+    m_boatSize=2;
+    qDebug() << m_boatSize;
+}
+
+void MainWindow::setBoatSize3()
+{
+    m_boatSize=3;
+    qDebug() << m_boatSize;
+}
+
+void MainWindow::setBoatSize4()
+{
+    m_boatSize=4;
+    qDebug() << m_boatSize;
+}
+
+void MainWindow::setBoatSize5()
+{
+    m_boatSize=5;
+    qDebug() << m_boatSize;
 }
 
 void MainWindow::recieveServerMsg()

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>601</height>
+    <width>1024</width>
+    <height>768</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -193,8 +193,8 @@
        </layout>
       </widget>
       <widget class="QWidget" name="gameScreen">
-       <layout class="QVBoxLayout" name="verticalLayout_3">
-        <item>
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="0" colspan="2">
          <layout class="QHBoxLayout" name="horizontalLayout_4">
           <item>
            <widget class="QGroupBox" name="playerBox">
@@ -207,6 +207,112 @@
             <property name="title">
              <string>PlayerName</string>
             </property>
+            <layout class="QGridLayout" name="gridLayout_5">
+             <item row="0" column="0">
+              <widget class="QTableWidget" name="tableWidget">
+               <row>
+                <property name="text">
+                 <string>1</string>
+                </property>
+               </row>
+               <row>
+                <property name="text">
+                 <string>2</string>
+                </property>
+               </row>
+               <row>
+                <property name="text">
+                 <string>3</string>
+                </property>
+               </row>
+               <row>
+                <property name="text">
+                 <string>4</string>
+                </property>
+               </row>
+               <row>
+                <property name="text">
+                 <string>5</string>
+                </property>
+               </row>
+               <row>
+                <property name="text">
+                 <string>6</string>
+                </property>
+               </row>
+               <row>
+                <property name="text">
+                 <string>7</string>
+                </property>
+               </row>
+               <row>
+                <property name="text">
+                 <string>8</string>
+                </property>
+               </row>
+               <row>
+                <property name="text">
+                 <string>9</string>
+                </property>
+               </row>
+               <row>
+                <property name="text">
+                 <string>10</string>
+                </property>
+               </row>
+               <column>
+                <property name="text">
+                 <string>1</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>2</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>3</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>4</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>5</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>6</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>7</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>8</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>9</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>10</string>
+                </property>
+               </column>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </item>
           <item>
@@ -220,11 +326,117 @@
             <property name="title">
              <string>Opponent Name</string>
             </property>
+            <layout class="QGridLayout" name="gridLayout_4">
+             <item row="0" column="0">
+              <widget class="QTableWidget" name="tableWidget_2">
+               <row>
+                <property name="text">
+                 <string>1</string>
+                </property>
+               </row>
+               <row>
+                <property name="text">
+                 <string>2</string>
+                </property>
+               </row>
+               <row>
+                <property name="text">
+                 <string>3</string>
+                </property>
+               </row>
+               <row>
+                <property name="text">
+                 <string>4</string>
+                </property>
+               </row>
+               <row>
+                <property name="text">
+                 <string>5</string>
+                </property>
+               </row>
+               <row>
+                <property name="text">
+                 <string>6</string>
+                </property>
+               </row>
+               <row>
+                <property name="text">
+                 <string>7</string>
+                </property>
+               </row>
+               <row>
+                <property name="text">
+                 <string>8</string>
+                </property>
+               </row>
+               <row>
+                <property name="text">
+                 <string>9</string>
+                </property>
+               </row>
+               <row>
+                <property name="text">
+                 <string>10</string>
+                </property>
+               </row>
+               <column>
+                <property name="text">
+                 <string>1</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>2</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>3</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>4</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>5</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>6</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>7</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>8</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>9</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>10</string>
+                </property>
+               </column>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </item>
          </layout>
         </item>
-        <item>
+        <item row="1" column="0">
          <layout class="QGridLayout" name="gridLayout_2">
           <item row="0" column="0">
            <spacer name="horizontalSpacer_5">
@@ -239,72 +451,100 @@
             </property>
            </spacer>
           </item>
-          <item row="0" column="1">
+          <item row="0" column="2">
            <widget class="QPushButton" name="pushButton">
             <property name="text">
              <string>Hit</string>
             </property>
            </widget>
           </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QGridLayout" name="gridLayout">
           <item row="0" column="1">
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>Notifications</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="1">
-           <layout class="QVBoxLayout" name="verticalLayout_4">
+           <layout class="QHBoxLayout" name="horizontalLayout_6">
             <item>
-             <widget class="QTextEdit" name="teNotifications">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
+             <widget class="QPushButton" name="boatSize5">
+              <property name="text">
+               <string>5</string>
               </property>
-              <property name="undoRedoEnabled">
-               <bool>false</bool>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="boatSize4">
+              <property name="text">
+               <string>4</string>
               </property>
-              <property name="readOnly">
-               <bool>true</bool>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="boatSize3">
+              <property name="text">
+               <string>3</string>
               </property>
-              <property name="textInteractionFlags">
-               <set>Qt::NoTextInteraction</set>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="boatSize2">
+              <property name="text">
+               <string>2</string>
               </property>
              </widget>
             </item>
            </layout>
           </item>
-          <item row="4" column="0">
-           <widget class="QTextEdit" name="teChat">
+         </layout>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>Chat</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>Notifications</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QTextEdit" name="teChat">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="QTextEdit" name="teNotifications">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="undoRedoEnabled">
+             <bool>false</bool>
+            </property>
             <property name="readOnly">
              <bool>true</bool>
             </property>
+            <property name="textInteractionFlags">
+             <set>Qt::NoTextInteraction</set>
+            </property>
            </widget>
           </item>
-          <item row="5" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
-            <item>
-             <widget class="QLineEdit" name="leTextMsg"/>
-            </item>
-            <item>
-             <widget class="QPushButton" name="sendButton">
-              <property name="text">
-               <string>Send</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
+         </layout>
+        </item>
+        <item row="4" column="0">
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <widget class="QLineEdit" name="leTextMsg"/>
           </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_5">
+          <item>
+           <widget class="QPushButton" name="sendButton">
             <property name="text">
-             <string>Chat</string>
+             <string>Send</string>
             </property>
            </widget>
           </item>
