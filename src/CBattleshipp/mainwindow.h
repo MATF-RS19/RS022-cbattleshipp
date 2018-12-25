@@ -24,12 +24,16 @@ private Q_SLOTS:
     void setBoatSize3();
     void setBoatSize4();
     void setBoatSize5();
+    void setBoat(int y, int x);
     void recieveServerMsg();
 
 private:
     Ui::MainWindow *ui;
     Player m_player;
+    bool m_selectedCell = false;
     int m_boatSize=0;
+    int m_x1 = -2;
+    int m_y1 = -2;
 };
 
 #endif // MAINWINDOW_H

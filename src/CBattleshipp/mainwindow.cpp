@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QMessageBox>
+#include <qmath.h>
 
 #include <QString>
 
@@ -8,6 +10,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    for(int i = 0; i < 10; i++){
+        ui->tableWidget->setColumnWidth(i,32);
+        ui->tableWidget->setRowHeight(i,32);
+        ui->tableWidget_2->setColumnWidth(i,32);
+        ui->tableWidget_2->setRowHeight(i,32);
+        }
 
     connect(ui->playButton, SIGNAL(clicked(bool)), this, SLOT(onPlayClicked()));
     connect(ui->sendButton, SIGNAL(clicked(bool)), this, SLOT(onSendClicked()));
@@ -15,7 +23,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->boatSize3, SIGNAL(clicked(bool)), this, SLOT(setBoatSize3()));
     connect(ui->boatSize4, SIGNAL(clicked(bool)), this, SLOT(setBoatSize4()));
     connect(ui->boatSize5, SIGNAL(clicked(bool)), this, SLOT(setBoatSize5()));
+    connect(ui->tableWidget, SIGNAL(cellClicked(int,int)), this, SLOT(setBoat(int,int)));
 }
+
+
 
 MainWindow::~MainWindow()
 {
@@ -24,13 +35,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::onPlayClicked()
 {
-
-    for(int i = 0; i < 10; i++){
-        ui->tableWidget->setColumnWidth(i,32);
-        ui->tableWidget->setRowHeight(i,32);
-        ui->tableWidget_2->setColumnWidth(i,32);
-        ui->tableWidget_2->setRowHeight(i,32);
-        }
 
     m_player.name(ui->lePlayerName->text());
 
@@ -45,8 +49,10 @@ void MainWindow::onPlayClicked()
 
         m_player.m_socket->write(QString("iw2p: " + m_player.name() + "\n").toUtf8());
     }
-    else { // TODO: handle error with an error window popup
-        qDebug() << "$ Connection failed";
+    else {
+        QMessageBox msgBox;
+        msgBox.setText("Server could not be found!");
+        msgBox.exec();
     }
 
 }
@@ -91,6 +97,45 @@ void MainWindow::setBoatSize5()
 {
     m_boatSize=5;
     qDebug() << m_boatSize;
+}
+
+void MainWindow::setBoat(int y, int x)
+{
+    if(m_selectedCell){
+        if((qFabs(x - m_x1) == 1 && y - m_y1 == 0) || (qFabs(y - m_y1) == 1 && x - m_x1 == 0)){
+            ui->tableWidget->setItem(y, x, new QTableWidgetItem);
+            ui->tableWidget->item(y, x)->setBackground(Qt::green);
+
+            // reset marker variable
+            m_selectedCell = false;
+        }
+        else {
+        m_x1 = -2;
+        m_y1 = -2;
+        m_selectedCell = false;
+        }
+    }
+    else{
+        if(x != 0){
+            ui->tableWidget->setItem(y, x - 1, new QTableWidgetItem);
+            ui->tableWidget->item(y, x - 1)->setBackground(Qt::gray);
+        }
+        if(x != 9){
+            ui->tableWidget->setItem(y, x + 1, new QTableWidgetItem);
+            ui->tableWidget->item(y, x + 1)->setBackground(Qt::gray);
+        }
+        if(y != 0){
+            ui->tableWidget->setItem(y - 1, x, new QTableWidgetItem);
+            ui->tableWidget->item(y - 1, x)->setBackground(Qt::gray);
+        }
+        if(y != 9){
+            ui->tableWidget->setItem(y + 1, x, new QTableWidgetItem);
+            ui->tableWidget->item(y + 1, x)->setBackground(Qt::gray);
+        }
+        m_selectedCell = true;
+        m_x1 = x;
+        m_y1 = y;
+    }
 }
 
 void MainWindow::recieveServerMsg()
