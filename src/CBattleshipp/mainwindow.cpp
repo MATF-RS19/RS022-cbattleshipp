@@ -59,6 +59,7 @@ void MainWindow::onPlayClicked()
     else {
         QMessageBox msgBox;
         msgBox.setText("Server could not be found!");
+        msgBox.setIcon(QMessageBox::Information);
         msgBox.exec();
     }
 }
