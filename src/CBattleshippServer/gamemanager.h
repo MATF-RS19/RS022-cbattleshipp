@@ -5,6 +5,7 @@
 #include "game.h"
 
 #include <vector>
+#include <list>
 #include <memory>
 
 #include <QObject>
@@ -20,7 +21,7 @@ public:
 
 private:
     std::vector<std::unique_ptr<Player>> m_waitingPlayers;
-    std::vector<Game> m_activeGames;
+    std::list<Game> m_activeGames;
 
     uint16_t m_playerCounter = 0;
     uint16_t m_gameCounter = 0;

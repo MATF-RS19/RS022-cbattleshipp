@@ -33,6 +33,7 @@ private:
 
     void handlePlayRequest(QJsonObject & request);
     void handleChatRequest(QJsonObject & request);
+    void handlePlayAgainRequest(QJsonObject & request);
 
     QTcpSocket *opponentSocket(int playerType, int gameId);
     QTcpSocket *opponentSocket(qintptr socketDescriptor);

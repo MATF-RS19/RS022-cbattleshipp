@@ -11,6 +11,10 @@ void GameManager::addToWaitingList(std::unique_ptr<Player> && player)
 {
     ++m_playerCounter;
     m_waitingPlayers.push_back(std::move(player));
+
+    //	start a new game for players who already played a game
+    if (m_playerCounter % 2 == 0 && m_waitingPlayers.back()->m_playerType != 0)
+        startGame();
 }
 
 

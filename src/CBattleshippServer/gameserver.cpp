@@ -8,6 +8,7 @@
 #include <QJsonObject>
 
 #include <memory>
+#include <iterator>
 
 GameServer::GameServer(QObject * parent)
     : QTcpServer(parent)
@@ -66,6 +67,9 @@ void GameServer::handleRequest()
 
     if (request.contains("chat_msg"))
         handleChatRequest(request);
+
+    if (request.contains("play_again"))
+        handlePlayAgainRequest(request);
 }
 
 void GameServer::clientDisconnected()
@@ -85,6 +89,8 @@ void GameServer::clientDisconnected()
         // FIXME: possible memory leak here
         socket->close();
     }
+
+    emit log("Player disconnected");
 }
 
 void GameServer::handlePlayRequest(QJsonObject & request)
@@ -114,6 +120,22 @@ void GameServer::handleChatRequest(QJsonObject & request)
         auto socket = opponentSocket(2, request.value("game_id").toInt());
         if (socket != nullptr)
             socket->write(doc.toJson());
+    }
+}
+
+void GameServer::handlePlayAgainRequest(QJsonObject &request)
+{
+    for (auto i = std::begin(m_gm.m_activeGames); i != std::end(m_gm.m_activeGames); ++i) {
+        if (i->m_player1->m_playerType == request.value("player_type").toInt()) {
+                m_gm.addToWaitingList(std::move(i->m_player1));
+                m_gm.m_activeGames.erase(i);
+                break;
+        }
+        else if (i->m_player2->m_playerType == request.value("player_type").toInt()) {
+                m_gm.addToWaitingList(std::move(i->m_player2));
+                m_gm.m_activeGames.erase(i);
+                break;
+        }
     }
 }
 

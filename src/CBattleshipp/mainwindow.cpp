@@ -198,9 +198,33 @@ void MainWindow::handleChatResponse(QJsonObject & response)
 
 void MainWindow::handleOpponentDisconnectedResponse(QJsonObject & response)
 {
-    // TODO: handle with window prompt
-    //       give player an option to start a new game
+    QMessageBox msgBox;
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.setText("Opponent has left the game. Play again?");
 
-    ui->teNotifications->append(response.value("pd").toString());
-    ui->opponentBox->setDisabled(true);
+    QAbstractButton* buttonYes = msgBox.addButton(tr("Yes"), QMessageBox::YesRole);
+    QAbstractButton* buttonNo = msgBox.addButton(tr("Quit"), QMessageBox::NoRole);
+
+    ui->teNotifications->clear();
+    ui->teChat->clear();
+
+    msgBox.exec();
+
+    if (msgBox.clickedButton() == buttonYes) {
+        ui->opponentBox->setTitle("Opponent name");
+        ui->teNotifications->append("Wait for other player to joint the game.");
+
+        QJsonObject msg;
+        msg.insert("play_again", 1);
+        msg.insert("player_type", m_player.m_playerType);
+        msg.insert("game_id", m_player.m_gameId);
+
+
+        QJsonDocument doc(msg);
+        m_player.m_socket->write(doc.toJson());
+    }
+
+    if (msgBox.clickedButton() == buttonNo) {
+        exit(EXIT_SUCCESS);
+    }
 }
