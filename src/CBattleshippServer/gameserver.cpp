@@ -43,6 +43,7 @@ void GameServer::incomingConnection(qintptr handle)
     player->m_socket->setSocketDescriptor(handle);
 
     connect(player->m_socket.get(), SIGNAL(readyRead()), this, SLOT(handleRequest()));
+    connect(player->m_socket.get(), SIGNAL(disconnected()), this, SLOT(deleteLater()));
     connect(player->m_socket.get(), SIGNAL(disconnected()), this, SLOT(clientDisconnected()));
 
     m_gm.addToWaitingList(std::move(player));
@@ -84,10 +85,7 @@ void GameServer::clientDisconnected()
 
     if (oppSocket != nullptr) {
         oppSocket->write(doc.toJson());
-
-        // delete later = program crash
-        // FIXME: possible memory leak here
-        socket->close();
+        socket->disconnectFromHost();
     }
 
     emit log("Player disconnected");
