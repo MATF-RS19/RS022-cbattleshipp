@@ -24,7 +24,7 @@ private:
     std::unique_ptr<QTcpSocket> m_socket = nullptr;
     QString m_name;
 
-    QChar m_playerType;
+    uint8_t m_playerType;
     qint32 m_gameId;
 
     friend class MainWindow;

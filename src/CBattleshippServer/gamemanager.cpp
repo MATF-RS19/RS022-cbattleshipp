@@ -1,5 +1,8 @@
 #include "gamemanager.h"
 
+#include <QJsonDocument>
+#include <QJsonObject>
+
 GameManager::GameManager(QObject *parent)
     : QObject(parent)
 {}
@@ -26,19 +29,31 @@ void GameManager::startGame()
     // remove last two joined players
     m_playerCounter -= 2;
 
-    player1->m_playerType = 'a';
-    player2->m_playerType = 'b';
+    player1->m_playerType = 1;
+    player2->m_playerType = 2;
 
     // send opponent info
-    player1->m_socket->write(QString("opp_name: " +
-                                     player2->m_name + " " +
-                                     player1->m_playerType + " " + QString::number(m_gameCounter) + "\n").toUtf8());
+    QJsonObject msg1;
+    msg1.insert("ucp", 1);
+    msg1.insert("opp_name", player2->name());
+    msg1.insert("player_type", player1->m_playerType);
+    msg1.insert("game_id", m_gameCounter);
 
-    player2->m_socket->write(QString("opp_name: " +
-                                     player1->m_name + " " +
-                                     player2->m_playerType + " " + QString::number(m_gameCounter) + "\n").toUtf8());
+    QJsonDocument doc1(msg1);
+    qDebug() << "Sending : " << doc1;
+    player1->m_socket->write(doc1.toJson());
 
+    QJsonObject msg2;
+    msg2.insert("ucp", 1);
+    msg2.insert("opp_name", player1->name());
+    msg2.insert("player_type", player2->m_playerType);
+    msg2.insert("game_id", m_gameCounter);
+
+    QJsonDocument doc2(msg2);
+    qDebug() << "Sending : " << doc2;
+    player2->m_socket->write(doc2.toJson());
+
+    // create a game
     Game game(nullptr, std::move(player1), std::move(player2), m_gameCounter);
-
     m_activeGames.push_back(std::move(game));
 }

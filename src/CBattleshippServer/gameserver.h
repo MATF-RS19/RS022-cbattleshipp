@@ -5,6 +5,8 @@
 
 #include <QObject>
 #include <QTcpServer>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 class GameServer : public QTcpServer
 {
@@ -28,6 +30,12 @@ private Q_SLOTS:
 
 private:
     GameManager m_gm;
+
+    void handlePlayRequest(QJsonObject & request);
+    void handleChatRequest(QJsonObject & request);
+
+    QTcpSocket *opponentSocket(int playerType, int gameId);
+    QTcpSocket *opponentSocket(qintptr socketDescriptor);
 };
 
 #endif // GAMESERVER_H

@@ -4,6 +4,8 @@
 #include "player.h"
 
 #include <QMainWindow>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 namespace Ui {
 class MainWindow;
@@ -34,6 +36,11 @@ private:
     int m_boatSize=0;
     int m_x1 = -2;
     int m_y1 = -2;
+
+    // server handle response methods
+    void handlePlayResponse(QJsonObject & response);
+    void handleChatResponse(QJsonObject & response);
+    void handleOpponentDisconnectedResponse(QJsonObject & response);
 };
 
 #endif // MAINWINDOW_H

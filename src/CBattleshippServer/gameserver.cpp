@@ -4,6 +4,8 @@
 #include <QNetworkInterface>
 #include <QTcpSocket>
 #include <QList>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 #include <memory>
 
@@ -51,73 +53,91 @@ void GameServer::handleRequest()
 {
     QTcpSocket *socket = static_cast<QTcpSocket*>(sender());
 
-    while (socket->canReadLine()) {
-         QString msg = QString::fromUtf8(socket->readLine()).trimmed();
+    QJsonDocument msg = QJsonDocument::fromJson(socket->readAll());
+    QJsonObject request = msg.object();
 
-         if (msg.contains("iw2p:")) {
-            QStringList request = msg.split(" ");
+    qDebug() << request;
 
-            // set player name
-            m_gm.m_waitingPlayers.at(m_gm.m_playerCounter - 1)->name(request[1]);
+    if (request.isEmpty())
+        return;
 
-            // if even number of players are on network, start a game
-            if (m_gm.m_playerCounter % 2 == 0)
-                m_gm.startGame();
+    if (request.contains("iw2p"))
+        handlePlayRequest(request);
 
-            return;
-         }
-
-         // TODO: serious refactoring!!!
-        if (msg.contains("chat_msg:")) {
-            QStringList request = msg.split(" ");
-
-            // qDebug() << msg;
-            // qDebug() << request[0];
-
-
-            if (!QString::compare(request[0], "a", Qt::CaseSensitivity::CaseInsensitive)) {
-                for (auto & game : m_gm.m_activeGames) {
-
-                    // qDebug() << "Hello there 1";
-                    // qDebug() << game.m_player1->m_name;
-                    // qDebug() << game.m_gameId;
-                    qDebug() << request;
-
-                    if (game.m_gameId == request[1].toInt()) {
-
-                        QString chatMsg = "chat_msg: [" + game.m_player1->m_name + "]: ";
-                        for (int i =3; i < request.size(); i++) {
-                            chatMsg.append(request[i]).append(" ");
-                        }
-
-                        game.m_player2->m_socket->write(QString(chatMsg + "\n").toUtf8());
-                        // qDebug() << "Hello there 2";
-                    }
-                }
-            }
-            else {
-                for (auto & game : m_gm.m_activeGames)
-                    if (game.m_gameId == request[1].toInt()) {
-
-                        QString chatMsg = "chat_msg: [" + game.m_player2->m_name + "]: ";
-                        for (int i = 3; i < request.size(); i++) {
-                            chatMsg.append(request[i]).append(" ");
-                        }
-
-                        game.m_player1->m_socket->write(QString(chatMsg + "\n").toUtf8());
-                    }
-            }
-
-            return;
-         }
-    }
+    if (request.contains("chat_msg"))
+        handleChatRequest(request);
 }
 
 void GameServer::clientDisconnected()
 {
-    // TODO: send other player notification that opponent left
+    QJsonObject msg;
+    msg.insert("pd", "Opponent has disconnected!");
+    QJsonDocument doc(msg);
+
     QTcpSocket *socket = static_cast<QTcpSocket*>(sender());
 
-    // delete later?
-    socket->close();
+    auto oppSocket = opponentSocket(socket->socketDescriptor());
+
+    if (oppSocket != nullptr) {
+        oppSocket->write(doc.toJson());
+
+        // delete later = program crash
+        // FIXME: possible memory leak here
+        socket->close();
+    }
+}
+
+void GameServer::handlePlayRequest(QJsonObject & request)
+{
+    // set player name
+    m_gm.m_waitingPlayers.at(m_gm.m_playerCounter - 1)->name(request.value("name").toString());
+
+    // if even number of players are on network, start a game
+    if (m_gm.m_playerCounter % 2 == 0)
+        m_gm.startGame();
+}
+
+void GameServer::handleChatRequest(QJsonObject & request)
+{
+    QJsonObject msg;
+    msg.insert("chat_msg", request.value("chat_msg").toString());
+    QJsonDocument doc(msg);
+
+    qDebug() << "Sending: " << doc.toJson();
+
+    if (request.value("player_type").toInt() == 1) {
+        auto socket = opponentSocket(1, request.value("game_id").toInt());
+        if (socket != nullptr)
+            socket->write(doc.toJson());
+    }
+    else {
+        auto socket = opponentSocket(2, request.value("game_id").toInt());
+        if (socket != nullptr)
+            socket->write(doc.toJson());
+    }
+}
+
+// methods for finding opponent's socket
+// NOTE: always check if socket is nullptr
+QTcpSocket *GameServer::opponentSocket(int playerType, int gameId)
+{
+    // find opponent socket
+    for (auto & game : m_gm.m_activeGames) {
+        if (gameId == game.m_gameId)
+            return playerType == game.m_player1->m_playerType ? game.m_player2->m_socket.get() : game.m_player1->m_socket.get();
+    }
+
+    return nullptr;
+}
+
+QTcpSocket *GameServer::opponentSocket(qintptr socketDescriptor)
+{
+    for (auto & game : m_gm.m_activeGames) {
+        if (socketDescriptor == game.m_player1->m_socket.get()->socketDescriptor())
+            return game.m_player2->m_socket.get();
+        if (socketDescriptor == game.m_player2->m_socket.get()->socketDescriptor())
+            return game.m_player1->m_socket.get();
+    }
+
+    return nullptr;
 }

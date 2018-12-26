@@ -1,8 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+
 #include <QMessageBox>
 #include <qmath.h>
-
 #include <QString>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -27,15 +27,15 @@ MainWindow::MainWindow(QWidget *parent) :
 }
 
 
-
 MainWindow::~MainWindow()
 {
     delete ui;
 }
 
+
 void MainWindow::onPlayClicked()
 {
-
+    // set player name
     m_player.name(ui->lePlayerName->text());
 
     if (m_player.connectToHost(ui->leServerIP->text())) {
@@ -47,33 +47,44 @@ void MainWindow::onPlayClicked()
         ui->teNotifications->append("Connected");
         ui->teNotifications->append("Waiting for other player to join ...");
 
-        m_player.m_socket->write(QString("iw2p: " + m_player.name() + "\n").toUtf8());
+        // send play request
+        QJsonObject request;
+        request.insert("iw2p", 1);
+        request.insert("name", m_player.name());
+
+        QJsonDocument document(request);
+
+        m_player.m_socket->write(document.toJson());
     }
     else {
         QMessageBox msgBox;
         msgBox.setText("Server could not be found!");
         msgBox.exec();
     }
-
 }
-
 
 
 void MainWindow::onSendClicked()
 {
+    // send chat request
     if (!ui->leTextMsg->text().isEmpty()) {
-        // print message to you chat
+        // print message to your chat box
         ui->teChat->append(QString("[" + m_player.name() + "]: " + ui->leTextMsg->text()));
 
         // send message to other player
-        m_player.m_socket->write(QString(QString(m_player.m_playerType) + " " +
-                                         QString::number(m_player.m_gameId) +
-                                         " chat_msg: " +
-                                         ui->leTextMsg->text() + "\n").toUtf8());
+        // message format [player_name]: msg_content
+        QJsonObject request;
+        request.insert("chat_msg", "[" + m_player.name() + "]: " + ui->leTextMsg->text());
+        request.insert("player_type", m_player.m_playerType);
+        request.insert("game_id", m_player.m_gameId);
+
+        QJsonDocument doc(request);
+        m_player.m_socket->write(doc.toJson());
 
         ui->leTextMsg->clear();
     }
 }
+
 
 void MainWindow::setBoatSize2()
 {
@@ -81,11 +92,13 @@ void MainWindow::setBoatSize2()
     qDebug() << m_boatSize;
 }
 
+
 void MainWindow::setBoatSize3()
 {
     m_boatSize=3;
     qDebug() << m_boatSize;
 }
+
 
 void MainWindow::setBoatSize4()
 {
@@ -93,11 +106,13 @@ void MainWindow::setBoatSize4()
     qDebug() << m_boatSize;
 }
 
+
 void MainWindow::setBoatSize5()
 {
     m_boatSize=5;
     qDebug() << m_boatSize;
 }
+
 
 void MainWindow::setBoat(int y, int x)
 {
@@ -138,43 +153,53 @@ void MainWindow::setBoat(int y, int x)
     }
 }
 
+
 void MainWindow::recieveServerMsg()
 {
     QTcpSocket *socket = static_cast<QTcpSocket*>(sender());
 
-    while (socket->canReadLine()) {
-         QString msg = QString::fromUtf8(socket->readLine()).trimmed();
-         qDebug() << msg;
+    QJsonDocument msg = QJsonDocument::fromJson(socket->readAll());
+    QJsonObject response = msg.object();
 
-         // inform that other player has joined and that game has started
-         if (msg.contains("opp_name:")) {
-            QStringList request = msg.split(" ");
+    qDebug() << response;
 
-            qDebug() << msg;
+    if (response.isEmpty())
+        return;
 
-            m_player.m_playerType = request[2].at(0);
-            m_player.m_gameId = request[3].toInt();
+    if (response.contains("ucp"))
+        handlePlayResponse(response);
 
-            ui->opponentBox->setTitle(request[1]);
-            ui->teNotifications->append("Player " + request[1] + " joined!");
-            ui->teNotifications->append("Game will start soon ...");
+    if (response.contains("chat_msg"))
+        handleChatResponse(response);
 
-            return;
-         }
+    if (response.contains("pd"))
+        handleOpponentDisconnectedResponse(response);
+}
 
-         // print opponent message
-         if (msg.contains("chat_msg:")) {
-            QStringList request = msg.split(" ");
-            QString chatMsg;
+void MainWindow::handlePlayResponse(QJsonObject & response)
+{
+    // set player type and game id
+    m_player.m_playerType = response.value("player_type").toInt();
+    m_player.m_gameId = response.value("game_id").toInt();
 
-            qDebug() << msg;
+    // inform that other player has joined and that game has started
+    ui->teNotifications->append("Player " + response.value("opp_name").toString() + " joined!");
+    ui->opponentBox->setTitle(response.value("opp_name").toString());
 
-            for (int i = 1; i < request.size(); i++)
-                chatMsg.append(request[i]).append(" ");
+    ui->teNotifications->append("Game has started!");
+    ui->teNotifications->append("Place your boats and then click on Ready.");
+}
 
-            ui->teChat->append(chatMsg);
+void MainWindow::handleChatResponse(QJsonObject & response)
+{
+    ui->teChat->append(response.value("chat_msg").toString());
+}
 
-            return;
-         }
-    }
+void MainWindow::handleOpponentDisconnectedResponse(QJsonObject & response)
+{
+    // TODO: handle with window prompt
+    //       give player an option to start a new game
+
+    ui->teNotifications->append(response.value("pd").toString());
+    ui->opponentBox->setDisabled(true);
 }
