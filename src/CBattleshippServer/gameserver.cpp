@@ -43,7 +43,6 @@ void GameServer::incomingConnection(qintptr handle)
     player->m_socket->setSocketDescriptor(handle);
 
     connect(player->m_socket.get(), SIGNAL(readyRead()), this, SLOT(handleRequest()));
-    connect(player->m_socket.get(), SIGNAL(disconnected()), this, SLOT(deleteLater()));
     connect(player->m_socket.get(), SIGNAL(disconnected()), this, SLOT(clientDisconnected()));
 
     m_gm.addToWaitingList(std::move(player));
