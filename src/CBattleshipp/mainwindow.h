@@ -36,6 +36,10 @@ private:
     int m_boatSize=0;
     int m_x1 = -2;
     int m_y1 = -2;
+    int m_availableShipsSize2 = 4;
+    int m_availableShipsSize3 = 3;
+    int m_availableShipsSize4 = 2;
+    int m_availableShipsSize5 = 1;
 
     // server handle response methods
     void handlePlayResponse(QJsonObject & response);

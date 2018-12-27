@@ -89,41 +89,81 @@ void MainWindow::onSendClicked()
 
 void MainWindow::setBoatSize2()
 {
-    m_boatSize=2;
+    if(m_availableShipsSize2 > 0)
+        m_boatSize=2;
     qDebug() << m_boatSize;
 }
 
 
 void MainWindow::setBoatSize3()
 {
-    m_boatSize=3;
+    if(m_availableShipsSize3 > 0)
+        m_boatSize=3;
     qDebug() << m_boatSize;
 }
 
 
 void MainWindow::setBoatSize4()
 {
-    m_boatSize=4;
+    if(m_availableShipsSize4 > 0)
+        m_boatSize=4;
     qDebug() << m_boatSize;
 }
 
 
 void MainWindow::setBoatSize5()
 {
-    m_boatSize=5;
+    if(m_availableShipsSize5 > 0)
+        m_boatSize=5;
     qDebug() << m_boatSize;
 }
 
 
 void MainWindow::setBoat(int y, int x)
 {
+    //second click
     if(m_selectedCell){
+        //set boat
         if((qFabs(x - m_x1) == 1 && y - m_y1 == 0) || (qFabs(y - m_y1) == 1 && x - m_x1 == 0)){
-            ui->tableWidget->setItem(y, x, new QTableWidgetItem);
-            ui->tableWidget->item(y, x)->setBackground(Qt::green);
-
+            //right
+            if(x > m_x1 && m_x1 + m_boatSize - 1 <= 9){
+                for(int i = 0; i < m_boatSize; i++){
+                    ui->tableWidget->setItem(m_y1, m_x1 + i, new QTableWidgetItem);
+                    ui->tableWidget->item(m_y1, m_x1 + i)->setBackground(Qt::green);
+                }
+            }
+            //left
+            if(x < m_x1 && m_x1 - m_boatSize + 1 >= 0){
+                for(int i = 0; i < m_boatSize; i++){
+                    ui->tableWidget->setItem(m_y1, m_x1 - i, new QTableWidgetItem);
+                    ui->tableWidget->item(m_y1, m_x1 - i)->setBackground(Qt::green);
+                }
+            }
+            //down
+            if(y > m_y1 && m_y1 + m_boatSize - 1 <= 9){
+                for(int i = 0; i < m_boatSize; i++){
+                    ui->tableWidget->setItem(m_y1 + i, m_x1, new QTableWidgetItem);
+                    ui->tableWidget->item(m_y1 + i, m_x1)->setBackground(Qt::green);
+                }
+            }
+            //up
+            if(y < m_y1 && m_y1 - m_boatSize + 1 >= 0){
+                for(int i = 0; i < m_boatSize; i++){
+                    ui->tableWidget->setItem(m_y1 - i, m_x1, new QTableWidgetItem);
+                    ui->tableWidget->item(m_y1 - i, m_x1)->setBackground(Qt::green);
+                }
+            }
+            if(m_boatSize==2)
+                --m_availableShipsSize2;
+            else if(m_boatSize==3)
+                --m_availableShipsSize3;
+            else if(m_boatSize==4)
+                --m_availableShipsSize4;
+            else
+                --m_availableShipsSize5;
             // reset marker variable
             m_selectedCell = false;
+            m_boatSize = 0;
         }
         else {
         m_x1 = -2;
@@ -131,6 +171,7 @@ void MainWindow::setBoat(int y, int x)
         m_selectedCell = false;
         }
     }
+    //first click
     else{
         if(x != 0){
             ui->tableWidget->setItem(y, x - 1, new QTableWidgetItem);
