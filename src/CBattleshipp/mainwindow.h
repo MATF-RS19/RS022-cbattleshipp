@@ -26,7 +26,7 @@ private Q_SLOTS:
     void setBoatSize3();
     void setBoatSize4();
     void setBoatSize5();
-    void setBoat(int y, int x);
+    void onCellClick(int y, int x);
     void recieveServerMsg();
 
 private:
@@ -42,6 +42,8 @@ private:
     int m_availableShipsSize5 = 1;
 
     // server handle response methods
+    void deleteGray(int y, int x);
+    void reduceBoatCount();
     void handlePlayResponse(QJsonObject & response);
     void handleChatResponse(QJsonObject & response);
     void handleOpponentDisconnectedResponse(QJsonObject & response);

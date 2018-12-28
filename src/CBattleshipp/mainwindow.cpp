@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include <qmath.h>
 #include <QString>
+#include <QTableWidgetItem>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -15,7 +16,13 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->tableWidget->setRowHeight(i,32);
         ui->tableWidget_2->setColumnWidth(i,32);
         ui->tableWidget_2->setRowHeight(i,32);
+    }
+
+    for(int i = 0; i < 10; i++){
+        for(int j = 0; j < 10; j++){
+            ui->tableWidget->setItem(i, j, new QTableWidgetItem);
         }
+    }
 
     connect(ui->playButton, SIGNAL(clicked(bool)), this, SLOT(onPlayClicked()));
     connect(ui->sendButton, SIGNAL(clicked(bool)), this, SLOT(onSendClicked()));
@@ -23,7 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->boatSize3, SIGNAL(clicked(bool)), this, SLOT(setBoatSize3()));
     connect(ui->boatSize4, SIGNAL(clicked(bool)), this, SLOT(setBoatSize4()));
     connect(ui->boatSize5, SIGNAL(clicked(bool)), this, SLOT(setBoatSize5()));
-    connect(ui->tableWidget, SIGNAL(cellClicked(int,int)), this, SLOT(setBoat(int,int)));
+    connect(ui->tableWidget, SIGNAL(cellClicked(int,int)), this, SLOT(onCellClick(int,int)));
 }
 
 
@@ -119,8 +126,9 @@ void MainWindow::setBoatSize5()
 }
 
 
-void MainWindow::setBoat(int y, int x)
+void MainWindow::onCellClick(int y, int x)
 {
+    bool cellUsed = false;
     //second click
     if(m_selectedCell){
         //set boat
@@ -128,65 +136,77 @@ void MainWindow::setBoat(int y, int x)
             //right
             if(x > m_x1 && m_x1 + m_boatSize - 1 <= 9){
                 for(int i = 0; i < m_boatSize; i++){
-                    ui->tableWidget->setItem(m_y1, m_x1 + i, new QTableWidgetItem);
-                    ui->tableWidget->item(m_y1, m_x1 + i)->setBackground(Qt::green);
+                    cellUsed = cellUsed || ui->tableWidget->item(m_y1, m_x1 + i)->isSelected();
+                }
+                if(!cellUsed){
+                    for(int i = 0; i < m_boatSize; i++){
+                        ui->tableWidget->item(m_y1, m_x1 + i)->setSelected(true);
+                    }
+                    reduceBoatCount();
                 }
             }
             //left
             if(x < m_x1 && m_x1 - m_boatSize + 1 >= 0){
                 for(int i = 0; i < m_boatSize; i++){
-                    ui->tableWidget->setItem(m_y1, m_x1 - i, new QTableWidgetItem);
-                    ui->tableWidget->item(m_y1, m_x1 - i)->setBackground(Qt::green);
+                    cellUsed = cellUsed || ui->tableWidget->item(m_y1, m_x1 - i)->isSelected();
+                }
+                if(!cellUsed){
+                    for(int i = 0; i < m_boatSize; i++){
+                        ui->tableWidget->item(m_y1, m_x1 - i)->setSelected(true);
+                    }
+                    reduceBoatCount();
                 }
             }
             //down
             if(y > m_y1 && m_y1 + m_boatSize - 1 <= 9){
                 for(int i = 0; i < m_boatSize; i++){
-                    ui->tableWidget->setItem(m_y1 + i, m_x1, new QTableWidgetItem);
-                    ui->tableWidget->item(m_y1 + i, m_x1)->setBackground(Qt::green);
+                    cellUsed = cellUsed || ui->tableWidget->item(m_y1 + i, m_x1)->isSelected();
+                }
+                if(!cellUsed){
+                    for(int i = 0; i < m_boatSize; i++){
+                        ui->tableWidget->item(m_y1 + i, m_x1)->setSelected(true);
+                    }
+                    reduceBoatCount();
                 }
             }
             //up
             if(y < m_y1 && m_y1 - m_boatSize + 1 >= 0){
                 for(int i = 0; i < m_boatSize; i++){
-                    ui->tableWidget->setItem(m_y1 - i, m_x1, new QTableWidgetItem);
-                    ui->tableWidget->item(m_y1 - i, m_x1)->setBackground(Qt::green);
+                    cellUsed = cellUsed || ui->tableWidget->item(m_y1 - i, m_x1)->isSelected();
+                }
+                if(!cellUsed){
+                    for(int i = 0; i < m_boatSize; i++){
+                        ui->tableWidget->item(m_y1 - i, m_x1)->setSelected(true);
+                    }
+                    reduceBoatCount();
                 }
             }
-            if(m_boatSize==2)
-                --m_availableShipsSize2;
-            else if(m_boatSize==3)
-                --m_availableShipsSize3;
-            else if(m_boatSize==4)
-                --m_availableShipsSize4;
-            else
-                --m_availableShipsSize5;
+
             // reset marker variable
+            deleteGray(m_y1,m_x1);
             m_selectedCell = false;
             m_boatSize = 0;
         }
         else {
-        m_x1 = -2;
-        m_y1 = -2;
-        m_selectedCell = false;
+            deleteGray(m_y1,m_x1);
+            m_x1 = -2;
+            m_y1 = -2;
+            m_selectedCell = false;
         }
+
     }
     //first click
     else{
         if(x != 0){
-            ui->tableWidget->setItem(y, x - 1, new QTableWidgetItem);
             ui->tableWidget->item(y, x - 1)->setBackground(Qt::gray);
         }
         if(x != 9){
-            ui->tableWidget->setItem(y, x + 1, new QTableWidgetItem);
             ui->tableWidget->item(y, x + 1)->setBackground(Qt::gray);
         }
         if(y != 0){
-            ui->tableWidget->setItem(y - 1, x, new QTableWidgetItem);
             ui->tableWidget->item(y - 1, x)->setBackground(Qt::gray);
         }
         if(y != 9){
-            ui->tableWidget->setItem(y + 1, x, new QTableWidgetItem);
             ui->tableWidget->item(y + 1, x)->setBackground(Qt::gray);
         }
         m_selectedCell = true;
@@ -195,6 +215,40 @@ void MainWindow::setBoat(int y, int x)
     }
 }
 
+void MainWindow::reduceBoatCount()
+{
+    if(m_boatSize == 2){
+        m_availableShipsSize2--;
+        qDebug() << m_availableShipsSize2 << "brodova2";
+    }
+    if(m_boatSize == 3){
+        m_availableShipsSize3--;
+        qDebug() << m_availableShipsSize3 << "brodova3";
+    }
+    if(m_boatSize == 4){
+        m_availableShipsSize4--;
+        qDebug() << m_availableShipsSize4 << "brodova4";
+    }
+    if(m_boatSize == 5){
+        m_availableShipsSize5--;
+        qDebug() << m_availableShipsSize5 << "brodova5";
+    }
+}
+
+void MainWindow::deleteGray(int y, int x){
+    //right
+    if(x != 9)
+        ui->tableWidget->item(y, x + 1)->setBackground(Qt::white);
+    //left
+    if(x != 0)
+        ui->tableWidget->item(y, x - 1)->setBackground(Qt::white);
+    //down
+    if(y != 9)
+        ui->tableWidget->item(y + 1, x)->setBackground(Qt::white);
+    //up
+    if(y != 0)
+        ui->tableWidget->item(y - 1, x)->setBackground(Qt::white);
+}
 
 void MainWindow::recieveServerMsg()
 {
