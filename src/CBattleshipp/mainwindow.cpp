@@ -130,90 +130,93 @@ void MainWindow::setBoatSize5()
 
 void MainWindow::onCellClick(int y, int x)
 {
-    bool cellUsed = false;
-    //second click
-    if(m_selectedCell){
-        //set boat
-        if((qFabs(x - m_x1) == 1 && y - m_y1 == 0) || (qFabs(y - m_y1) == 1 && x - m_x1 == 0)){
-            //right
-            if(x > m_x1 && m_x1 + m_boatSize - 1 <= 9){
-                for(int i = 0; i < m_boatSize; i++){
-                    cellUsed = cellUsed || ui->tableWidget->item(m_y1, m_x1 + i)->isSelected();
-                }
-                if(!cellUsed){
+    //user must first click on ship size before placing it
+    if(m_boatSize!=0){
+        bool cellUsed = false;
+        //second click
+        if(m_selectedCell){
+            //set boat
+            if((qFabs(x - m_x1) == 1 && y - m_y1 == 0) || (qFabs(y - m_y1) == 1 && x - m_x1 == 0)){
+                //right
+                if(x > m_x1 && m_x1 + m_boatSize - 1 <= 9){
                     for(int i = 0; i < m_boatSize; i++){
-                        ui->tableWidget->item(m_y1, m_x1 + i)->setSelected(true);
+                        cellUsed = cellUsed || ui->tableWidget->item(m_y1, m_x1 + i)->isSelected();
                     }
-                    reduceBoatCount();
+                    if(!cellUsed){
+                        for(int i = 0; i < m_boatSize; i++){
+                            ui->tableWidget->item(m_y1, m_x1 + i)->setSelected(true);
+                        }
+                        reduceBoatCount();
+                    }
                 }
+                //left
+                if(x < m_x1 && m_x1 - m_boatSize + 1 >= 0){
+                    for(int i = 0; i < m_boatSize; i++){
+                        cellUsed = cellUsed || ui->tableWidget->item(m_y1, m_x1 - i)->isSelected();
+                    }
+                    if(!cellUsed){
+                        for(int i = 0; i < m_boatSize; i++){
+                            ui->tableWidget->item(m_y1, m_x1 - i)->setSelected(true);
+                        }
+                        reduceBoatCount();
+                    }
+                }
+                //down
+                if(y > m_y1 && m_y1 + m_boatSize - 1 <= 9){
+                    for(int i = 0; i < m_boatSize; i++){
+                        cellUsed = cellUsed || ui->tableWidget->item(m_y1 + i, m_x1)->isSelected();
+                    }
+                    if(!cellUsed){
+                        for(int i = 0; i < m_boatSize; i++){
+                            ui->tableWidget->item(m_y1 + i, m_x1)->setSelected(true);
+                        }
+                        reduceBoatCount();
+                    }
+                }
+                //up
+                if(y < m_y1 && m_y1 - m_boatSize + 1 >= 0){
+                    for(int i = 0; i < m_boatSize; i++){
+                        cellUsed = cellUsed || ui->tableWidget->item(m_y1 - i, m_x1)->isSelected();
+                    }
+                    if(!cellUsed){
+                        for(int i = 0; i < m_boatSize; i++){
+                            ui->tableWidget->item(m_y1 - i, m_x1)->setSelected(true);
+                        }
+                        reduceBoatCount();
+                    }
+                }
+
+                // reset marker variable
+                deleteGray(m_y1,m_x1);
+                m_selectedCell = false;
+                m_boatSize = 0;
             }
-            //left
-            if(x < m_x1 && m_x1 - m_boatSize + 1 >= 0){
-                for(int i = 0; i < m_boatSize; i++){
-                    cellUsed = cellUsed || ui->tableWidget->item(m_y1, m_x1 - i)->isSelected();
-                }
-                if(!cellUsed){
-                    for(int i = 0; i < m_boatSize; i++){
-                        ui->tableWidget->item(m_y1, m_x1 - i)->setSelected(true);
-                    }
-                    reduceBoatCount();
-                }
-            }
-            //down
-            if(y > m_y1 && m_y1 + m_boatSize - 1 <= 9){
-                for(int i = 0; i < m_boatSize; i++){
-                    cellUsed = cellUsed || ui->tableWidget->item(m_y1 + i, m_x1)->isSelected();
-                }
-                if(!cellUsed){
-                    for(int i = 0; i < m_boatSize; i++){
-                        ui->tableWidget->item(m_y1 + i, m_x1)->setSelected(true);
-                    }
-                    reduceBoatCount();
-                }
-            }
-            //up
-            if(y < m_y1 && m_y1 - m_boatSize + 1 >= 0){
-                for(int i = 0; i < m_boatSize; i++){
-                    cellUsed = cellUsed || ui->tableWidget->item(m_y1 - i, m_x1)->isSelected();
-                }
-                if(!cellUsed){
-                    for(int i = 0; i < m_boatSize; i++){
-                        ui->tableWidget->item(m_y1 - i, m_x1)->setSelected(true);
-                    }
-                    reduceBoatCount();
-                }
+            else {
+                deleteGray(m_y1,m_x1);
+                m_x1 = -2;
+                m_y1 = -2;
+                m_selectedCell = false;
             }
 
-            // reset marker variable
-            deleteGray(m_y1,m_x1);
-            m_selectedCell = false;
-            m_boatSize = 0;
         }
-        else {
-            deleteGray(m_y1,m_x1);
-            m_x1 = -2;
-            m_y1 = -2;
-            m_selectedCell = false;
+        //first click
+        else if(!ui->tableWidget->item(y, x)->isSelected()){
+            if(x != 0){
+                ui->tableWidget->item(y, x - 1)->setBackground(Qt::gray);
+            }
+            if(x != 9){
+                ui->tableWidget->item(y, x + 1)->setBackground(Qt::gray);
+            }
+            if(y != 0){
+                ui->tableWidget->item(y - 1, x)->setBackground(Qt::gray);
+            }
+            if(y != 9){
+                ui->tableWidget->item(y + 1, x)->setBackground(Qt::gray);
+            }
+            m_selectedCell = true;
+            m_x1 = x;
+            m_y1 = y;
         }
-
-    }
-    //first click
-    else{
-        if(x != 0){
-            ui->tableWidget->item(y, x - 1)->setBackground(Qt::gray);
-        }
-        if(x != 9){
-            ui->tableWidget->item(y, x + 1)->setBackground(Qt::gray);
-        }
-        if(y != 0){
-            ui->tableWidget->item(y - 1, x)->setBackground(Qt::gray);
-        }
-        if(y != 9){
-            ui->tableWidget->item(y + 1, x)->setBackground(Qt::gray);
-        }
-        m_selectedCell = true;
-        m_x1 = x;
-        m_y1 = y;
     }
 }
 
@@ -221,18 +224,22 @@ void MainWindow::reduceBoatCount()
 {
     if(m_boatSize == 2){
         m_availableShipsSize2--;
+        ui->countSize2->setText(QString::number(m_availableShipsSize2));
         qDebug() << m_availableShipsSize2 << "brodova2";
     }
     if(m_boatSize == 3){
         m_availableShipsSize3--;
+        ui->countSize3->setText(QString::number(m_availableShipsSize3));
         qDebug() << m_availableShipsSize3 << "brodova3";
     }
     if(m_boatSize == 4){
         m_availableShipsSize4--;
+        ui->countSize4->setText(QString::number(m_availableShipsSize4));
         qDebug() << m_availableShipsSize4 << "brodova4";
     }
     if(m_boatSize == 5){
         m_availableShipsSize5--;
+        ui->countSize5->setText(QString::number(m_availableShipsSize5));
         qDebug() << m_availableShipsSize5 << "brodova5";
     }
 }
