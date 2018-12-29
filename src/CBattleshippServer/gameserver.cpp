@@ -195,10 +195,10 @@ void GameServer::handleReadyRequest(QJsonObject &request)
     // set player's ships
     player->m_ships = request;
 
-    // if opponent ships are all set up, game can start
     auto opp = m_gm.opponent(player->m_playerType, gameId);
     QJsonObject response;
 
+    // if opponent ships are all set up, game can start
     if (opp != nullptr) {
         if (!opp->m_ships.empty()) {
             response.insert("start_game", 1);
@@ -206,20 +206,19 @@ void GameServer::handleReadyRequest(QJsonObject &request)
             QJsonDocument msg(response);
             player->m_socket->write(msg.toJson());
         }
+        else {
+            // send message to player that opponent is not ready
+            response.insert("wait_opp", 1);
+            QJsonDocument msg(response);
 
-    }
-    else {
-        // send message to player that opponent is not ready
-        response.insert("wait_opp", 1);
-        QJsonDocument msg(response);
+            player->m_socket->write(msg.toJson());
 
-        player->m_socket->write(msg.toJson());
+            // send message to opponent that his opponent is ready
+            QJsonObject readyMsg;
+            readyMsg.insert("opp_ready", 1);
+            QJsonDocument info(readyMsg);
 
-        // send message to opponent that his opponent is ready
-        QJsonObject readyMsg;
-        readyMsg.insert("opp_ready", 1);
-        QJsonDocument info(readyMsg);
-
-        opp->m_socket->write(info.toJson());
+            opp->m_socket->write(info.toJson());
+        }
     }
 }

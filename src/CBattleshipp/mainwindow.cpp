@@ -25,13 +25,19 @@ MainWindow::MainWindow(QWidget *parent) :
         }
     }
 
+    ui->playerBox->setEnabled(false);
+    ui->opponentBox->setEnabled(false);
+
     connect(ui->playButton, SIGNAL(clicked(bool)), this, SLOT(onPlayClicked()));
     connect(ui->sendButton, SIGNAL(clicked(bool)), this, SLOT(onSendClicked()));
+
     connect(ui->boatSize2, SIGNAL(clicked(bool)), this, SLOT(setBoatSize2()));
     connect(ui->boatSize3, SIGNAL(clicked(bool)), this, SLOT(setBoatSize3()));
     connect(ui->boatSize4, SIGNAL(clicked(bool)), this, SLOT(setBoatSize4()));
     connect(ui->boatSize5, SIGNAL(clicked(bool)), this, SLOT(setBoatSize5()));
+
     connect(ui->tableWidget, SIGNAL(cellClicked(int,int)), this, SLOT(onCellClick(int,int)));
+
     connect(ui->ReadyButton, SIGNAL(clicked(bool)), this, SLOT(onReadyToPlayButtonClicked()));
 }
 
@@ -293,6 +299,9 @@ void MainWindow::handlePlayResponse(QJsonObject & response)
 
     ui->teNotifications->append("Game has started!");
     ui->teNotifications->append("Place your boats and then click on Ready.");
+
+    // player can now place ships
+    ui->playerBox->setEnabled(true);
 }
 
 void MainWindow::handleChatResponse(QJsonObject & response)

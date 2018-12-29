@@ -8,7 +8,8 @@ Player::Player(QObject *parent, std::unique_ptr<QTcpSocket> && socket)
 
 Player::Player(Player &&other)
     : m_socket(std::move(other.m_socket)),
-      m_name(std::move(other.m_name))
+      m_name(std::move(other.m_name)),
+      m_playerType(other.m_playerType)
 {}
 
 

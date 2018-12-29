@@ -22,29 +22,37 @@ public:
 private Q_SLOTS:
     void onPlayClicked();
     void onSendClicked();
+
     void setBoatSize2();
     void setBoatSize3();
     void setBoatSize4();
     void setBoatSize5();
+
     void onCellClick(int y, int x);
-    void recieveServerMsg();
     void onReadyToPlayButtonClicked();
+
+    void recieveServerMsg();
 
 private:
     Ui::MainWindow *ui;
     Player m_player;
+
     bool m_selectedCell = false;
+
     int m_boatSize=0;
+
     int m_x1 = -2;
     int m_y1 = -2;
+
     int m_availableShipsSize2 = 4;
     int m_availableShipsSize3 = 3;
     int m_availableShipsSize4 = 2;
     int m_availableShipsSize5 = 1;
 
-    // server handle response methods
     void deleteGray(int y, int x);
     void reduceBoatCount();
+
+    // server handle response methods
     void handlePlayResponse(QJsonObject & response);
     void handleChatResponse(QJsonObject & response);
     void handleOpponentDisconnectedResponse(QJsonObject & response);
