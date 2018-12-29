@@ -18,6 +18,8 @@ public:
     explicit GameManager(QObject *parent = nullptr);
 
     void addToWaitingList(std::unique_ptr<Player> && player);
+    Player *findIngamePlayer(int playerType, int gameId) const;
+    Player *opponent(int playerType, int gameId) const;
 
 private:
     std::vector<std::unique_ptr<Player>> m_waitingPlayers;

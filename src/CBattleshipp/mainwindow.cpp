@@ -347,6 +347,7 @@ void MainWindow::onReadyToPlayButtonClicked()
         //Send to server map of ships
         QJsonObject mapOfShips;
 
+        mapOfShips.insert("ready", 1);
         mapOfShips.insert("gameId", m_player.m_gameId);
         mapOfShips.insert("playerType", m_player.m_playerType);
 

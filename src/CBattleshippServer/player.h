@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QString>
 #include <QTcpSocket>
+#include <QJsonObject>
 
 #include <memory>
 
@@ -23,6 +24,8 @@ public:
 private:
     std::unique_ptr<QTcpSocket> m_socket;
     QString m_name;
+
+    QJsonObject m_ships;
 
     // playerType values are 1 and 2 for ingame players and 0 for new players
     uint8_t m_playerType = 0;

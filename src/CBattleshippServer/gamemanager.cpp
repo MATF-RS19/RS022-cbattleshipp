@@ -19,6 +19,37 @@ void GameManager::addToWaitingList(std::unique_ptr<Player> && player)
         startGame();
 }
 
+
+Player *GameManager::findIngamePlayer(int playerType, int gameId) const
+{
+    for (auto & game : m_activeGames) {
+        if (game.m_gameId == gameId) {
+            if (game.m_player1->m_playerType == playerType)
+                return  game.m_player1.get();
+            else
+                return game.m_player2.get();
+        }
+    }
+
+    return nullptr;
+}
+
+
+Player *GameManager::opponent(int playerType, int gameId) const
+{
+    for (auto & game : m_activeGames) {
+        if (game.m_gameId == gameId) {
+            if (game.m_player1->m_playerType == playerType)
+                return  game.m_player2.get();
+            else
+                return game.m_player1.get();
+        }
+    }
+
+    return nullptr;
+}
+
+
 void GameManager::removeWaitingPlayer()
 {
     --m_playerCounter;

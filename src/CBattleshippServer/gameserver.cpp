@@ -66,17 +66,30 @@ void GameServer::handleRequest()
     if (request.isEmpty())
         return;
 
-    if (request.contains("iw2p"))
+    if (request.contains("iw2p")) {
         handlePlayRequest(request);
+        return;
+    }
 
-    if (request.contains("chat_msg"))
+    if (request.contains("chat_msg")) {
         handleChatRequest(request);
+        return;
+    }
 
-    if (request.contains("play_again"))
+    if (request.contains("play_again")) {
         handlePlayAgainRequest(request);
+        return;
+    }
 
-    if (request.contains("quit"))
+    if (request.contains("quit")) {
         handlePlayAgainRequest(request);
+        return;
+    }
+
+    if (request.contains("ready")) {
+        handleReadyRequest(request);
+        return;
+    }
 }
 
 
@@ -165,5 +178,48 @@ void GameServer::handleQuitRequest(QJsonObject &request)
                 m_gm.m_activeGames.erase(i);
                 break;
         }
+    }
+}
+
+
+void GameServer::handleReadyRequest(QJsonObject &request)
+{
+    auto player = m_gm.findIngamePlayer(request.value("playerType").toInt(), request.value("gameId").toInt());
+    auto gameId = request.value("gameId").toInt();
+
+    // remove player info
+    request.remove("ready");
+    request.remove("playerType");
+    request.remove("gameId");
+
+    // set player's ships
+    player->m_ships = request;
+
+    // if opponent ships are all set up, game can start
+    auto opp = m_gm.opponent(player->m_playerType, gameId);
+    QJsonObject response;
+
+    if (opp != nullptr) {
+        if (!opp->m_ships.empty()) {
+            response.insert("start_game", 1);
+
+            QJsonDocument msg(response);
+            player->m_socket->write(msg.toJson());
+        }
+
+    }
+    else {
+        // send message to player that opponent is not ready
+        response.insert("wait_opp", 1);
+        QJsonDocument msg(response);
+
+        player->m_socket->write(msg.toJson());
+
+        // send message to opponent that his opponent is ready
+        QJsonObject readyMsg;
+        readyMsg.insert("opp_ready", 1);
+        QJsonDocument info(readyMsg);
+
+        opp->m_socket->write(info.toJson());
     }
 }
