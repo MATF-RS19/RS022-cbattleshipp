@@ -28,6 +28,7 @@ private Q_SLOTS:
     void setBoatSize5();
     void onCellClick(int y, int x);
     void recieveServerMsg();
+    void onReadyToPlayButtonClicked();
 
 private:
     Ui::MainWindow *ui;

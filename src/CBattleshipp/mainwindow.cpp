@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include <qmath.h>
 #include <QString>
+#include <QJsonArray>
 #include <QTableWidgetItem>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -31,6 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->boatSize4, SIGNAL(clicked(bool)), this, SLOT(setBoatSize4()));
     connect(ui->boatSize5, SIGNAL(clicked(bool)), this, SLOT(setBoatSize5()));
     connect(ui->tableWidget, SIGNAL(cellClicked(int,int)), this, SLOT(onCellClick(int,int)));
+    connect(ui->ReadyButton, SIGNAL(clicked(bool)), this, SLOT(onReadyToPlayButtonClicked()));
 }
 
 
@@ -326,5 +328,47 @@ void MainWindow::handleOpponentDisconnectedResponse(QJsonObject & response)
         m_player.m_socket->write(doc.toJson());
 
         exit(EXIT_SUCCESS);
+    }
+}
+
+
+
+void MainWindow::onReadyToPlayButtonClicked()
+{
+    //Check if all ships are set up
+    if(m_availableShipsSize2 != 0 || m_availableShipsSize3 !=0 || m_availableShipsSize4 != 0 || m_availableShipsSize5 != 0 ){
+
+        QMessageBox msgBox;
+        msgBox.setText("Boats are not set up!");
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.exec();
+
+    }else{
+        //Send to server map of ships
+        QJsonObject mapOfShips;
+
+        mapOfShips.insert("gameId", m_player.m_gameId);
+        mapOfShips.insert("playerType", m_player.m_playerType);
+
+        for(int i=0 ; i<ui->tableWidget->rowCount(); ++i){
+
+            QJsonArray niz;
+
+            for (int j = 0; j < ui->tableWidget->columnCount(); ++j) {
+
+                if(ui->tableWidget->item(i,j)->isSelected()){
+                    niz.append(1);
+                }else{
+                    niz.append(0);
+                }
+
+            }
+            mapOfShips.insert(QString::number(i), niz);
+        }
+
+        QJsonDocument doc(mapOfShips);
+        m_player.m_socket->write(doc.toJson());
+
+        qDebug() << doc;
     }
 }
