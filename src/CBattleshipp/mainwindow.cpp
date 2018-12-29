@@ -268,7 +268,7 @@ void MainWindow::recieveServerMsg()
     if (response.contains("chat_msg"))
         handleChatResponse(response);
 
-    if (response.contains("pd"))
+    if (response.contains("od"))
         handleOpponentDisconnectedResponse(response);
 }
 
@@ -305,11 +305,12 @@ void MainWindow::handleOpponentDisconnectedResponse(QJsonObject & response)
 
     msgBox.exec();
 
+    QJsonObject msg;
+
     if (msgBox.clickedButton() == buttonYes) {
         ui->opponentBox->setTitle("Opponent name");
         ui->teNotifications->append("Wait for other player to joint the game.");
 
-        QJsonObject msg;
         msg.insert("play_again", 1);
         msg.insert("player_type", m_player.m_playerType);
         msg.insert("game_id", m_player.m_gameId);
@@ -320,6 +321,10 @@ void MainWindow::handleOpponentDisconnectedResponse(QJsonObject & response)
     }
 
     if (msgBox.clickedButton() == buttonNo) {
+        msg.insert("quit", 1);
+        QJsonDocument doc(msg);
+        m_player.m_socket->write(doc.toJson());
+
         exit(EXIT_SUCCESS);
     }
 }

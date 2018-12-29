@@ -26,7 +26,7 @@ protected:
 
 private Q_SLOTS:
     void handleRequest();
-    void clientDisconnected();
+    void playerDisconnected();
 
 private:
     GameManager m_gm;
@@ -34,9 +34,7 @@ private:
     void handlePlayRequest(QJsonObject & request);
     void handleChatRequest(QJsonObject & request);
     void handlePlayAgainRequest(QJsonObject & request);
-
-    QTcpSocket *opponentSocket(int playerType, int gameId);
-    QTcpSocket *opponentSocket(qintptr socketDescriptor);
+    void handleQuitRequest(QJsonObject & request);
 };
 
 #endif // GAMESERVER_H

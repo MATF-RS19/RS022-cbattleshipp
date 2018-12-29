@@ -28,6 +28,11 @@ private:
 
     void startGame();
 
+    void removeWaitingPlayer();
+
+    QTcpSocket *opponentSocket(int playerType, int gameId);
+    QTcpSocket *opponentSocket(qintptr socketDescriptor);
+
     friend class GameServer;
 };
 

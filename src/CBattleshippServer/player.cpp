@@ -11,10 +11,12 @@ Player::Player(Player &&other)
       m_name(std::move(other.m_name))
 {}
 
+
 void Player::name(const QString & playerName)
 {
     m_name = QString(playerName);
 }
+
 
 QString Player::name() const
 {

@@ -3,9 +3,11 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
+
 GameManager::GameManager(QObject *parent)
     : QObject(parent)
 {}
+
 
 void GameManager::addToWaitingList(std::unique_ptr<Player> && player)
 {
@@ -15,6 +17,14 @@ void GameManager::addToWaitingList(std::unique_ptr<Player> && player)
     //	start a new game for players who already played a game
     if (m_playerCounter % 2 == 0 && m_waitingPlayers.back()->m_playerType != 0)
         startGame();
+}
+
+void GameManager::removeWaitingPlayer()
+{
+    --m_playerCounter;
+    auto deletedPlayer = std::move(m_waitingPlayers.back());
+    deletedPlayer.release();
+    m_waitingPlayers.pop_back();
 }
 
 
@@ -60,4 +70,31 @@ void GameManager::startGame()
     // create a game
     Game game(nullptr, std::move(player1), std::move(player2), m_gameCounter);
     m_activeGames.push_back(std::move(game));
+}
+
+
+// methods for finding opponent's socket
+// NOTE: always check if socket is nullptr
+QTcpSocket *GameManager::opponentSocket(int playerType, int gameId)
+{
+    // find opponent socket
+    for (auto & game : m_activeGames) {
+        if (gameId == game.m_gameId)
+            return playerType == game.m_player1->m_playerType ? game.m_player2->m_socket.get() : game.m_player1->m_socket.get();
+    }
+
+    return nullptr;
+}
+
+
+QTcpSocket *GameManager::opponentSocket(qintptr socketDescriptor)
+{
+    for (auto & game : m_activeGames) {
+        if (socketDescriptor == game.m_player1->m_socket.get()->socketDescriptor())
+            return game.m_player2->m_socket.get();
+        else if (socketDescriptor == game.m_player2->m_socket.get()->socketDescriptor())
+            return game.m_player1->m_socket.get();
+    }
+
+    return nullptr;
 }

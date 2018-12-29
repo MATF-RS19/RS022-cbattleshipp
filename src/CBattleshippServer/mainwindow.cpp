@@ -8,15 +8,18 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 }
 
+
 MainWindow::~MainWindow()
 {
     delete ui;
 }
 
+
 void MainWindow::writeLog(const QString & logMsg)
 {
    ui->log->append(logMsg);
 }
+
 
 void MainWindow::writeIp(const QString & ipAddress)
 {

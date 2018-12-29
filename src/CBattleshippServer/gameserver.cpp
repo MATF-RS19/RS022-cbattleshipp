@@ -10,9 +10,11 @@
 #include <memory>
 #include <iterator>
 
+
 GameServer::GameServer(QObject * parent)
     : QTcpServer(parent)
 {}
+
 
 void GameServer::startServer()
 {
@@ -32,6 +34,7 @@ void GameServer::startServer()
     emit log("Server started successfully.");
 }
 
+
 void GameServer::incomingConnection(qintptr handle)
 {
     // create new player
@@ -43,12 +46,13 @@ void GameServer::incomingConnection(qintptr handle)
     player->m_socket->setSocketDescriptor(handle);
 
     connect(player->m_socket.get(), SIGNAL(readyRead()), this, SLOT(handleRequest()));
-    connect(player->m_socket.get(), SIGNAL(disconnected()), this, SLOT(clientDisconnected()));
+    connect(player->m_socket.get(), SIGNAL(disconnected()), this, SLOT(playerDisconnected()));
 
     m_gm.addToWaitingList(std::move(player));
 
     emit log("Player connected to server.");
 }
+
 
 void GameServer::handleRequest()
 {
@@ -70,25 +74,34 @@ void GameServer::handleRequest()
 
     if (request.contains("play_again"))
         handlePlayAgainRequest(request);
+
+    if (request.contains("quit"))
+        handlePlayAgainRequest(request);
 }
 
-void GameServer::clientDisconnected()
-{
-    QJsonObject msg;
-    msg.insert("pd", "Opponent has disconnected!");
-    QJsonDocument doc(msg);
 
+void GameServer::playerDisconnected()
+{
     QTcpSocket *socket = static_cast<QTcpSocket*>(sender());
 
-    auto oppSocket = opponentSocket(socket->socketDescriptor());
+    auto oppSocket = m_gm.opponentSocket(socket->socketDescriptor());
 
+    // if player was in a game, send opponent disconnected response
     if (oppSocket != nullptr) {
+        QJsonObject msg;
+        msg.insert("od", 1);
+        QJsonDocument doc(msg);
         oppSocket->write(doc.toJson());
-        socket->disconnectFromHost();
+
+    } // player left before playing a game
+    else {
+        m_gm.removeWaitingPlayer();
     }
 
+    socket->disconnectFromHost();
     emit log("Player disconnected");
 }
+
 
 void GameServer::handlePlayRequest(QJsonObject & request)
 {
@@ -100,6 +113,7 @@ void GameServer::handlePlayRequest(QJsonObject & request)
         m_gm.startGame();
 }
 
+
 void GameServer::handleChatRequest(QJsonObject & request)
 {
     QJsonObject msg;
@@ -109,54 +123,47 @@ void GameServer::handleChatRequest(QJsonObject & request)
     qDebug() << "Sending: " << doc.toJson();
 
     if (request.value("player_type").toInt() == 1) {
-        auto socket = opponentSocket(1, request.value("game_id").toInt());
+        auto socket = m_gm.opponentSocket(1, request.value("game_id").toInt());
         if (socket != nullptr)
             socket->write(doc.toJson());
     }
     else {
-        auto socket = opponentSocket(2, request.value("game_id").toInt());
+        auto socket = m_gm.opponentSocket(2, request.value("game_id").toInt());
         if (socket != nullptr)
             socket->write(doc.toJson());
     }
 }
+
 
 void GameServer::handlePlayAgainRequest(QJsonObject &request)
 {
     for (auto i = std::begin(m_gm.m_activeGames); i != std::end(m_gm.m_activeGames); ++i) {
         if (i->m_player1->m_playerType == request.value("player_type").toInt()) {
                 m_gm.addToWaitingList(std::move(i->m_player1));
+                i->m_player2.release();
                 m_gm.m_activeGames.erase(i);
                 break;
         }
         else if (i->m_player2->m_playerType == request.value("player_type").toInt()) {
                 m_gm.addToWaitingList(std::move(i->m_player2));
+                i->m_player1.release();
                 m_gm.m_activeGames.erase(i);
                 break;
         }
     }
 }
 
-// methods for finding opponent's socket
-// NOTE: always check if socket is nullptr
-QTcpSocket *GameServer::opponentSocket(int playerType, int gameId)
+
+// delete players who left the game
+void GameServer::handleQuitRequest(QJsonObject &request)
 {
-    // find opponent socket
-    for (auto & game : m_gm.m_activeGames) {
-        if (gameId == game.m_gameId)
-            return playerType == game.m_player1->m_playerType ? game.m_player2->m_socket.get() : game.m_player1->m_socket.get();
+    for (auto i = std::begin(m_gm.m_activeGames); i != std::end(m_gm.m_activeGames); ++i) {
+        if (i->m_player1->m_playerType == request.value("player_type").toInt() ||
+            i->m_player2->m_playerType == request.value("player_type").toInt()) {
+                i->m_player1.release();
+                i->m_player2.release();
+                m_gm.m_activeGames.erase(i);
+                break;
+        }
     }
-
-    return nullptr;
-}
-
-QTcpSocket *GameServer::opponentSocket(qintptr socketDescriptor)
-{
-    for (auto & game : m_gm.m_activeGames) {
-        if (socketDescriptor == game.m_player1->m_socket.get()->socketDescriptor())
-            return game.m_player2->m_socket.get();
-        if (socketDescriptor == game.m_player2->m_socket.get()->socketDescriptor())
-            return game.m_player1->m_socket.get();
-    }
-
-    return nullptr;
 }
