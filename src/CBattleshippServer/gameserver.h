@@ -8,6 +8,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
+#define GAME_PORT 5050
+
 class GameServer : public QTcpServer
 {
     Q_OBJECT

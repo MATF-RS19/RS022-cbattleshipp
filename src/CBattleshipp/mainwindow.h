@@ -49,13 +49,23 @@ private:
     int m_availableShipsSize4 = 2;
     int m_availableShipsSize5 = 1;
 
+    // player turn variable false = player, true = opponent
+    bool m_turn = false;
+
+
     void deleteGray(int y, int x);
     void reduceBoatCount();
 
     // server handle response methods
     void handlePlayResponse(QJsonObject & response);
     void handleChatResponse(QJsonObject & response);
+
     void handleOpponentDisconnectedResponse(QJsonObject & response);
+
+    void handleWaitOpponentResponse(QJsonObject & response);
+    void handleReadyOpponentResponse(QJsonObject & response);
+
+    void handleGameStartResponse(QJsonObject & response);
 };
 
 #endif // MAINWINDOW_H

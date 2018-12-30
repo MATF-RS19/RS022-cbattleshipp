@@ -18,7 +18,7 @@ GameServer::GameServer(QObject * parent)
 
 void GameServer::startServer()
 {
-    if (!this->listen(QHostAddress::AnyIPv4, 5050)) {
+    if (!this->listen(QHostAddress::AnyIPv4, GAME_PORT)) {
         emit log("Server could not start!");
         return;
     }
@@ -66,6 +66,7 @@ void GameServer::handleRequest()
     if (request.isEmpty())
         return;
 
+    // player will send one request at a time = return from method
     if (request.contains("iw2p")) {
         handlePlayRequest(request);
         return;
@@ -152,15 +153,21 @@ void GameServer::handlePlayAgainRequest(QJsonObject &request)
 {
     for (auto i = std::begin(m_gm.m_activeGames); i != std::end(m_gm.m_activeGames); ++i) {
         if (i->m_player1->m_playerType == request.value("player_type").toInt()) {
+                i->m_player1->m_ships.empty();
                 m_gm.addToWaitingList(std::move(i->m_player1));
+
                 i->m_player2.release();
                 m_gm.m_activeGames.erase(i);
+
                 break;
         }
         else if (i->m_player2->m_playerType == request.value("player_type").toInt()) {
+                i->m_player2->m_ships.empty();
                 m_gm.addToWaitingList(std::move(i->m_player2));
+
                 i->m_player1.release();
                 m_gm.m_activeGames.erase(i);
+
                 break;
         }
     }
@@ -198,17 +205,26 @@ void GameServer::handleReadyRequest(QJsonObject &request)
     auto opp = m_gm.opponent(player->m_playerType, gameId);
     QJsonObject response;
 
-    // if opponent ships are all set up, game can start
+    // check if opponent ships are all set up, so game can start
     if (opp != nullptr) {
         if (!opp->m_ships.empty()) {
             response.insert("start_game", 1);
 
+            // set first player turn
+            if (player->m_playerType == 1)
+                response.insert("turn", player->m_name);
+            else {
+                response.insert("turn", opp->m_name);
+            }
+
             QJsonDocument msg(response);
             player->m_socket->write(msg.toJson());
+            opp->m_socket->write(msg.toJson());
         }
         else {
             // send message to player that opponent is not ready
             response.insert("wait_opp", 1);
+            response.insert("opp_name", opp->m_name);
             QJsonDocument msg(response);
 
             player->m_socket->write(msg.toJson());
@@ -216,6 +232,7 @@ void GameServer::handleReadyRequest(QJsonObject &request)
             // send message to opponent that his opponent is ready
             QJsonObject readyMsg;
             readyMsg.insert("opp_ready", 1);
+            readyMsg.insert("opp_name", player->m_name);
             QJsonDocument info(readyMsg);
 
             opp->m_socket->write(info.toJson());

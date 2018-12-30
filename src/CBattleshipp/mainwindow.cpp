@@ -265,6 +265,7 @@ void MainWindow::deleteGray(int y, int x){
         ui->tableWidget->item(y - 1, x)->setBackground(Qt::white);
 }
 
+
 void MainWindow::recieveServerMsg()
 {
     QTcpSocket *socket = static_cast<QTcpSocket*>(sender());
@@ -277,14 +278,37 @@ void MainWindow::recieveServerMsg()
     if (response.isEmpty())
         return;
 
-    if (response.contains("ucp"))
+    // server will send one response at a time = return statements
+    if (response.contains("ucp")) {
         handlePlayResponse(response);
+        return;
+    }
 
-    if (response.contains("chat_msg"))
+    if (response.contains("chat_msg")) {
         handleChatResponse(response);
+        return;
+    }
 
-    if (response.contains("od"))
+    if (response.contains("od")) {
         handleOpponentDisconnectedResponse(response);
+        return;
+    }
+
+    if (response.contains("wait_opp")) {
+        handleWaitOpponentResponse(response);
+        return;
+    }
+
+    if (response.contains("opp_ready")) {
+        handleReadyOpponentResponse(response);
+        return;
+    }
+
+    if (response.contains("start_game")) {
+        handleGameStartResponse(response);
+        return;
+    }
+
 }
 
 void MainWindow::handlePlayResponse(QJsonObject & response)
@@ -297,7 +321,6 @@ void MainWindow::handlePlayResponse(QJsonObject & response)
     ui->teNotifications->append("Player " + response.value("opp_name").toString() + " joined!");
     ui->opponentBox->setTitle(response.value("opp_name").toString());
 
-    ui->teNotifications->append("Game has started!");
     ui->teNotifications->append("Place your boats and then click on Ready.");
 
     // player can now place ships
@@ -333,11 +356,17 @@ void MainWindow::handleOpponentDisconnectedResponse(QJsonObject & response)
         msg.insert("player_type", m_player.m_playerType);
         msg.insert("game_id", m_player.m_gameId);
 
-
         QJsonDocument doc(msg);
         m_player.m_socket->write(doc.toJson());
-    }
 
+        // remove player's ships
+        for(int i = 0; i < ui->tableWidget->rowCount(); ++i) {
+            for (int j = 0; j < ui->tableWidget->columnCount(); ++j)
+                if (ui->tableWidget->item(i,j)->isSelected())
+                    ui->tableWidget->item(i, j)->setSelected(false);
+        }
+
+    }
     if (msgBox.clickedButton() == buttonNo) {
         msg.insert("quit", 1);
         QJsonDocument doc(msg);
@@ -347,6 +376,31 @@ void MainWindow::handleOpponentDisconnectedResponse(QJsonObject & response)
     }
 }
 
+void MainWindow::handleWaitOpponentResponse(QJsonObject &response)
+{
+    ui->teNotifications->append("Wait for " + response.value("opp_name").toString() + " to get ready.");
+}
+
+void MainWindow::handleReadyOpponentResponse(QJsonObject &response)
+{
+    ui->teNotifications->append(response.value("opp_name").toString() + " is ready.");
+}
+
+void MainWindow::handleGameStartResponse(QJsonObject &response)
+{
+   ui->opponentBox->setEnabled(true);
+
+   ui->teNotifications->append("Game starts!");
+   ui->teNotifications->append(response.value("turn").toString() + " turn.");
+
+   // set player turn
+   if (!response.value("turn").toString().compare(m_player.m_name)) {
+       m_turn = false;
+   }
+   else {
+       m_turn = true;
+   }
+}
 
 
 void MainWindow::onReadyToPlayButtonClicked()
@@ -387,5 +441,8 @@ void MainWindow::onReadyToPlayButtonClicked()
         m_player.m_socket->write(doc.toJson());
 
         qDebug() << doc;
+
+        // disable ReadyButton so player cannot send multiple ready requests
+        ui->ReadyButton->setDisabled(true);
     }
 }
