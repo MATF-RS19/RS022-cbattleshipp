@@ -26,6 +26,8 @@ private:
 
     uint8_t m_playerType;
     qint32 m_gameId;
+    qint64 m_greatAttack = 0;
+    qint64 m_shipsLeft = 30;
 
     friend class MainWindow;
 };

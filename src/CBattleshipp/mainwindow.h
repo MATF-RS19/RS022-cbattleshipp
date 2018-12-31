@@ -30,6 +30,8 @@ private Q_SLOTS:
 
     void onCellClick(int y, int x);
     void onReadyToPlayButtonClicked();
+    void onHitButtonClicked();
+    void onOpponentCellClicked(int y, int x);
 
     void recieveServerMsg();
 
@@ -38,11 +40,14 @@ private:
     Player m_player;
 
     bool m_selectedCell = false;
+    bool m_opponentSelectedCell = false;
 
     int m_boatSize=0;
 
     int m_x1 = -2;
     int m_y1 = -2;
+    int m_ox = -1;
+    int m_oy = -1;
 
     int m_availableShipsSize2 = 4;
     int m_availableShipsSize3 = 3;
@@ -64,6 +69,8 @@ private:
 
     void handleWaitOpponentResponse(QJsonObject & response);
     void handleReadyOpponentResponse(QJsonObject & response);
+    void handleAttackResponse(QJsonObject & response);
+    void handleIfHitResponse(QJsonObject & response);
 
     void handleGameStartResponse(QJsonObject & response);
 };

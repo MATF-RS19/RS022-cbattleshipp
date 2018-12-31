@@ -38,6 +38,7 @@ private:
     void handlePlayAgainRequest(QJsonObject & request);
     void handleQuitRequest(QJsonObject & request);
     void handleReadyRequest(QJsonObject & request);
+    void handleHitRequest(QJsonObject & request);
 };
 
 #endif // GAMESERVER_H

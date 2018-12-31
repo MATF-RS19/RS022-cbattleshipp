@@ -39,6 +39,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->tableWidget, SIGNAL(cellClicked(int,int)), this, SLOT(onCellClick(int,int)));
 
     connect(ui->ReadyButton, SIGNAL(clicked(bool)), this, SLOT(onReadyToPlayButtonClicked()));
+    connect(ui->hitButton, SIGNAL(clicked(bool)), this, SLOT(onHitButtonClicked()));
+    connect(ui->tableWidget_2, SIGNAL(cellClicked(int, int)), this, SLOT(onOpponentCellClicked(int, int)));
+
 }
 
 
@@ -309,6 +312,15 @@ void MainWindow::recieveServerMsg()
         return;
     }
 
+    if (response.contains("attack")) {
+        handleAttackResponse(response);
+        return;
+    }
+
+    if (response.contains("if_hit")) {
+        handleIfHitResponse(response);
+        return;
+    }
 }
 
 void MainWindow::handlePlayResponse(QJsonObject & response)
@@ -395,10 +407,12 @@ void MainWindow::handleGameStartResponse(QJsonObject &response)
 
    // set player turn
    if (!response.value("turn").toString().compare(m_player.m_name)) {
-       m_turn = false;
+       m_turn = true;
+
    }
    else {
-       m_turn = true;
+       m_turn = false;
+       ui->hitButton->setEnabled(false);
    }
 }
 
@@ -409,7 +423,7 @@ void MainWindow::onReadyToPlayButtonClicked()
     if(m_availableShipsSize2 != 0 || m_availableShipsSize3 !=0 || m_availableShipsSize4 != 0 || m_availableShipsSize5 != 0 ){
 
         QMessageBox msgBox;
-        msgBox.setText("Boats are not set up!");
+        msgBox.setText("Ships are not set up!");
         msgBox.setIcon(QMessageBox::Information);
         msgBox.exec();
 
@@ -444,5 +458,81 @@ void MainWindow::onReadyToPlayButtonClicked()
 
         // disable ReadyButton so player cannot send multiple ready requests
         ui->ReadyButton->setDisabled(true);
+    }
+}
+
+void MainWindow::onOpponentCellClicked(int y, int x){
+    m_opponentSelectedCell = true;
+    m_ox = x;
+    m_oy = y;
+}
+
+void MainWindow::onHitButtonClicked()
+{
+    if(m_opponentSelectedCell){
+           QJsonObject playerHit;
+           playerHit.insert("hit", 1);
+           playerHit.insert("x", m_ox);
+           playerHit.insert("y", m_oy);
+
+           playerHit.insert("gameId", m_player.m_gameId);
+           playerHit.insert("playerType", m_player.m_playerType);
+
+           m_turn = false;
+           ui->hitButton->setEnabled(false);
+
+           QJsonDocument doc(playerHit);
+           m_player.m_socket->write(doc.toJson());
+
+    }else{
+
+        QMessageBox msgBox;
+        msgBox.setText("Choose a cell!");
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.exec();
+    }
+}
+
+void MainWindow::handleAttackResponse(QJsonObject & response)
+{
+    if(response.contains("yah")){
+
+        ui->teNotifications->append("You are hit!");
+        m_player.m_shipsLeft--;
+        ui->shipsLeft->setText("  Ships left:" + QString::number(m_player.m_shipsLeft));
+
+        if(m_player.m_shipsLeft == 0){
+            QMessageBox msgBox;
+            msgBox.setText(m_player.name() + " you lost the game!");
+            msgBox.setIcon(QMessageBox::Information);
+            msgBox.exec();
+        }
+
+    }else{
+
+        ui->teNotifications->append("You are not hit!");
+        m_turn = true;
+        ui->hitButton->setEnabled(true);
+
+    }
+}
+
+void MainWindow::handleIfHitResponse(QJsonObject & response)
+{
+    if(response.contains("great_attack")){
+
+        ui->hitButton->setEnabled(true);
+        m_turn = true;
+        ui->teNotifications->append("You hit your opponent!");
+        m_player.m_greatAttack++;
+
+        if(m_player.m_greatAttack == 30){
+            QMessageBox msgBox;
+            msgBox.setText(m_player.name() + " you are winner!");
+            msgBox.setIcon(QMessageBox::Information);
+            msgBox.exec();
+        }
+    }else{
+        ui->teNotifications->append("You did't hit your opponent!");
     }
 }

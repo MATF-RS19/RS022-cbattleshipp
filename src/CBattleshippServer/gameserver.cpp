@@ -91,6 +91,11 @@ void GameServer::handleRequest()
         handleReadyRequest(request);
         return;
     }
+
+    if (request.contains("hit")) {
+        handleHitRequest(request);
+        return;
+    }
 }
 
 
@@ -238,4 +243,42 @@ void GameServer::handleReadyRequest(QJsonObject &request)
             opp->m_socket->write(info.toJson());
         }
     }
+}
+
+void GameServer::handleHitRequest(QJsonObject & request)
+{
+    auto player = m_gm.findIngamePlayer(request.value("playerType").toInt(), request.value("gameId").toInt());
+    auto gameId = request.value("gameId").toInt();
+
+    // remove player info
+    request.remove("hit");
+    request.remove("playerType");
+    request.remove("gameId");
+
+    auto opp = m_gm.opponent(player->m_playerType, gameId);
+
+    QJsonObject responseToOpponent;
+    QJsonObject responseToPlayer;
+
+    //send message to opponent that he/she is hit or not
+    responseToOpponent.insert("attack", 1);
+    //send message to player that he/she is hit opponent or not
+    responseToPlayer.insert("if_hit", 1);
+
+    if(opp->m_ships.value(QString::number(request.value("y").toInt()))[request.value("x").toInt()] == 1){
+
+        //yah = you are hit
+        responseToOpponent.insert("yah", 1);
+        responseToOpponent.insert("x", request.value("x"));
+        responseToOpponent.insert("y", request.value("y"));
+
+        responseToPlayer.insert("great_attack", 1);
+
+    }
+
+    QJsonDocument msgTO(responseToOpponent);
+    QJsonDocument msgTP(responseToPlayer);
+    opp->m_socket->write(msgTO.toJson());
+    player->m_socket->write(msgTP.toJson());
+
 }
