@@ -265,15 +265,16 @@ void GameServer::handleHitRequest(QJsonObject & request)
     //send message to player that he/she is hit opponent or not
     responseToPlayer.insert("if_hit", 1);
 
+    // send hit coordinates
+    responseToOpponent.insert("x", request.value("x"));
+    responseToOpponent.insert("y", request.value("y"));
+
     if(opp->m_ships.value(QString::number(request.value("y").toInt()))[request.value("x").toInt()] == 1){
 
         //yah = you are hit
         responseToOpponent.insert("yah", 1);
-        responseToOpponent.insert("x", request.value("x"));
-        responseToOpponent.insert("y", request.value("y"));
 
         responseToPlayer.insert("great_attack", 1);
-
     }
 
     QJsonDocument msgTO(responseToOpponent);

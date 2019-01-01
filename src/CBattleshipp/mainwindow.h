@@ -33,6 +33,8 @@ private Q_SLOTS:
     void onHitButtonClicked();
     void onOpponentCellClicked(int y, int x);
 
+    void onQuitClicked();
+
     void recieveServerMsg();
 
 private:
@@ -44,10 +46,17 @@ private:
 
     int m_boatSize=0;
 
+    // player's coordinates
     int m_x1 = -2;
     int m_y1 = -2;
+
+    // opponent's coordinates
     int m_ox = -1;
     int m_oy = -1;
+
+    // opponent's hit coordinates
+    int m_oppHitX = -1;
+    int m_oppHitY = -1;
 
     int m_availableShipsSize2 = 4;
     int m_availableShipsSize3 = 3;
@@ -73,6 +82,10 @@ private:
     void handleIfHitResponse(QJsonObject & response);
 
     void handleGameStartResponse(QJsonObject & response);
+
+    void setUiFonts();
+    void setCellSize();
+    void disablePlayerButtons();
 };
 
 #endif // MAINWINDOW_H

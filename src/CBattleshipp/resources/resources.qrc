@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>water.png</file>
+    </qresource>
+    <qresource prefix="/fonts">
+        <file>ArcadeClassic.ttf</file>
+    </qresource>
+</RCC>

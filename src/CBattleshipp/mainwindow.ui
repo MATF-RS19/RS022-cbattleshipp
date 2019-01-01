@@ -7,14 +7,20 @@
     <x>0</x>
     <y>0</y>
     <width>1024</width>
-    <height>768</height>
+    <height>785</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1024</width>
+    <height>0</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>cbattleshipp</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QGridLayout" name="gridLayout_3">
+   <layout class="QGridLayout" name="gridLayout_8">
     <item row="0" column="0">
      <widget class="QStackedWidget" name="displayManager">
       <widget class="QWidget" name="welcomeScreen">
@@ -25,7 +31,18 @@
            <widget class="QLineEdit" name="leServerIP"/>
           </item>
           <item row="0" column="1">
-           <widget class="QLabel" name="label_2">
+           <widget class="QLabel" name="laServerIP">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 255, 255);
+</string>
+            </property>
             <property name="text">
              <string>Server IP</string>
             </property>
@@ -63,7 +80,7 @@
          </layout>
         </item>
         <item>
-         <widget class="QLabel" name="label">
+         <widget class="QLabel" name="laGameTitle">
           <property name="minimumSize">
            <size>
             <width>0</width>
@@ -73,10 +90,13 @@
           <property name="font">
            <font>
             <family>Monospace</family>
-            <pointsize>36</pointsize>
-            <weight>50</weight>
-            <bold>false</bold>
+            <pointsize>90</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
            </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: rgb(255, 255, 255);</string>
           </property>
           <property name="text">
            <string>cbattleshipp</string>
@@ -119,7 +139,17 @@
                </spacer>
               </item>
               <item>
-               <widget class="QLabel" name="label_3">
+               <widget class="QLabel" name="laPlayerName">
+                <property name="font">
+                 <font>
+                  <pointsize>12</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">color:rgb(255, 255, 255)</string>
+                </property>
                 <property name="text">
                  <string>Player name</string>
                 </property>
@@ -192,66 +222,45 @@
       </widget>
       <widget class="QWidget" name="gameScreen">
        <layout class="QGridLayout" name="gridLayout">
-        <item row="2" column="0">
-         <widget class="QLabel" name="label_5">
-          <property name="text">
-           <string>Chat</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <layout class="QGridLayout" name="gridLayout_2">
-          <item row="0" column="3">
-           <widget class="QPushButton" name="boatSize3">
-            <property name="text">
-             <string>3</string>
-            </property>
-           </widget>
-          </item>
+        <item row="1" column="1">
+         <layout class="QGridLayout" name="gridLayout_3">
           <item row="1" column="1">
-           <widget class="QLabel" name="countSize5">
+           <widget class="QPushButton" name="ReadyButton">
             <property name="text">
-             <string>1</string>
+             <string>Ready</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="5">
+          <item row="0" column="1">
            <widget class="QPushButton" name="hitButton">
             <property name="text">
              <string>Hit</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
-           <widget class="QPushButton" name="boatSize4">
-            <property name="text">
-             <string>4</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QLabel" name="countSize4">
-            <property name="text">
-             <string>2</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="4">
-           <widget class="QLabel" name="countSize2">
-            <property name="text">
-             <string>4</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QPushButton" name="boatSize5">
-            <property name="text">
-             <string>5</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <spacer name="horizontalSpacer_5">
+         </layout>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="laChat">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(255, 255, 255);</string>
+          </property>
+          <property name="text">
+           <string>Chat</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0">
+         <widget class="QTextEdit" name="teChat">
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="1">
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <item>
+           <spacer name="horizontalSpacer_8">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
@@ -263,23 +272,100 @@
             </property>
            </spacer>
           </item>
-          <item row="0" column="4">
-           <widget class="QPushButton" name="boatSize2">
+          <item>
+           <widget class="QPushButton" name="quitButton">
             <property name="text">
-             <string>2</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="3">
-           <widget class="QLabel" name="countSize3">
-            <property name="text">
-             <string>3</string>
+             <string>Quit</string>
             </property>
            </widget>
           </item>
          </layout>
         </item>
+        <item row="5" column="1">
+         <widget class="QLabel" name="laNotifications">
+          <property name="styleSheet">
+           <string notr="true">color: rgb(255, 255, 255);</string>
+          </property>
+          <property name="text">
+           <string>Notifications</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QFrame" name="frame">
+          <property name="frameShape">
+           <enum>QFrame::Box</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <item>
+            <layout class="QGridLayout" name="gridLayout_7">
+             <item row="1" column="0">
+              <widget class="QLabel" name="laOpponentShips">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(255, 255, 255);</string>
+               </property>
+               <property name="text">
+                <string>Opponent's  ships  left</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLabel" name="laOpponentShipsLeft">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(255, 255, 255);</string>
+               </property>
+               <property name="text">
+                <string>30</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
         <item row="4" column="0">
+         <widget class="QFrame" name="frame_2">
+          <property name="frameShape">
+           <enum>QFrame::Box</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_6">
+           <item>
+            <widget class="QLabel" name="laPlayersShips">
+             <property name="styleSheet">
+              <string notr="true">color: rgb(255, 255, 255);</string>
+             </property>
+             <property name="text">
+              <string>Player's  ships  left</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="laPlayerShipsLeft">
+             <property name="styleSheet">
+              <string notr="true">color: rgb(255, 255, 255);</string>
+             </property>
+             <property name="text">
+              <string>30</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="7" column="0">
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
            <widget class="QLineEdit" name="leTextMsg"/>
@@ -293,21 +379,7 @@
           </item>
          </layout>
         </item>
-        <item row="2" column="1">
-         <widget class="QLabel" name="label_4">
-          <property name="text">
-           <string>Notifications</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QTextEdit" name="teChat">
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="1">
+        <item row="6" column="1">
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
            <widget class="QTextEdit" name="teNotifications">
@@ -334,18 +406,39 @@
          <layout class="QHBoxLayout" name="horizontalLayout_4">
           <item>
            <widget class="QGroupBox" name="playerBox">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>400</height>
-             </size>
-            </property>
             <property name="title">
              <string>PlayerName</string>
             </property>
             <layout class="QGridLayout" name="gridLayout_5">
              <item row="0" column="0">
-              <widget class="QTableWidget" name="tableWidget">
+              <widget class="QTableWidget" name="playerShips">
+               <property name="minimumSize">
+                <size>
+                 <width>440</width>
+                 <height>440</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>440</width>
+                 <height>440</height>
+                </size>
+               </property>
+               <property name="frameShape">
+                <enum>QFrame::StyledPanel</enum>
+               </property>
+               <property name="verticalScrollBarPolicy">
+                <enum>Qt::ScrollBarAlwaysOff</enum>
+               </property>
+               <property name="horizontalScrollBarPolicy">
+                <enum>Qt::ScrollBarAlwaysOff</enum>
+               </property>
+               <property name="sizeAdjustPolicy">
+                <enum>QAbstractScrollArea::AdjustToContents</enum>
+               </property>
+               <property name="autoScroll">
+                <bool>false</bool>
+               </property>
                <property name="editTriggers">
                 <set>QAbstractItemView::NoEditTriggers</set>
                </property>
@@ -462,18 +555,36 @@
           </item>
           <item>
            <widget class="QGroupBox" name="opponentBox">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>400</height>
-             </size>
-            </property>
             <property name="title">
              <string>Opponent Name</string>
             </property>
             <layout class="QGridLayout" name="gridLayout_4">
              <item row="0" column="0">
-              <widget class="QTableWidget" name="tableWidget_2">
+              <widget class="QTableWidget" name="opponentShips">
+               <property name="minimumSize">
+                <size>
+                 <width>440</width>
+                 <height>440</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>440</width>
+                 <height>440</height>
+                </size>
+               </property>
+               <property name="verticalScrollBarPolicy">
+                <enum>Qt::ScrollBarAlwaysOff</enum>
+               </property>
+               <property name="horizontalScrollBarPolicy">
+                <enum>Qt::ScrollBarAlwaysOff</enum>
+               </property>
+               <property name="sizeAdjustPolicy">
+                <enum>QAbstractScrollArea::AdjustToContents</enum>
+               </property>
+               <property name="autoScroll">
+                <bool>false</bool>
+               </property>
                <property name="editTriggers">
                 <set>QAbstractItemView::NoEditTriggers</set>
                </property>
@@ -590,19 +701,128 @@
           </item>
          </layout>
         </item>
-        <item row="4" column="1">
-         <widget class="QPushButton" name="ReadyButton">
-          <property name="text">
-           <string>Ready to play!</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QLabel" name="shipsLeft">
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
+        <item row="1" column="0">
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="1" column="0" colspan="2">
+           <widget class="QFrame" name="frame_3">
+            <property name="frameShape">
+             <enum>QFrame::Box</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Raised</enum>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_7">
+             <item>
+              <widget class="QLabel" name="laAvailableShips">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(255, 255, 255);</string>
+               </property>
+               <property name="text">
+                <string>Ships  available </string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="countSize5">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(255, 255, 255);</string>
+               </property>
+               <property name="text">
+                <string>1</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="countSize4">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(255, 255, 255);</string>
+               </property>
+               <property name="text">
+                <string>2</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="countSize3">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(255, 255, 255);</string>
+               </property>
+               <property name="text">
+                <string>3</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="countSize2">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(255, 255, 255);</string>
+               </property>
+               <property name="text">
+                <string>4</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="0" column="0" colspan="2">
+           <layout class="QHBoxLayout" name="horizontalLayout_8">
+            <item>
+             <spacer name="horizontalSpacer_9">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="boatSize5">
+              <property name="text">
+               <string>5 blocks</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="boatSize4">
+              <property name="text">
+               <string>4 Blocks</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="boatSize3">
+              <property name="text">
+               <string>3 Blocks</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="boatSize2">
+              <property name="text">
+               <string>2 Blocks</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>

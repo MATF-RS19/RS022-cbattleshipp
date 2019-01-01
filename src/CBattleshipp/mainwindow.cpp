@@ -1,33 +1,37 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QtMath>
 #include <QMessageBox>
-#include <qmath.h>
 #include <QString>
 #include <QJsonArray>
 #include <QTableWidgetItem>
+#include <QTableWidget>
+#include <QFontDatabase>
+
+#define CELL_SIZE 40
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    for(int i = 0; i < 10; i++){
-        ui->tableWidget->setColumnWidth(i,32);
-        ui->tableWidget->setRowHeight(i,32);
-        ui->tableWidget_2->setColumnWidth(i,32);
-        ui->tableWidget_2->setRowHeight(i,32);
-    }
 
+    setUiFonts();
+
+    setCellSize();
+
+    // set up table items
     for(int i = 0; i < 10; i++){
         for(int j = 0; j < 10; j++){
-            ui->tableWidget->setItem(i, j, new QTableWidgetItem);
+            ui->playerShips->setItem(i, j, new QTableWidgetItem);
+            ui->opponentShips->setItem(i, j, new QTableWidgetItem);
         }
     }
 
-    ui->playerBox->setEnabled(false);
-    ui->opponentBox->setEnabled(false);
+    disablePlayerButtons();
 
+    // connecting button's signals and corresponding slots
     connect(ui->playButton, SIGNAL(clicked(bool)), this, SLOT(onPlayClicked()));
     connect(ui->sendButton, SIGNAL(clicked(bool)), this, SLOT(onSendClicked()));
 
@@ -36,11 +40,21 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->boatSize4, SIGNAL(clicked(bool)), this, SLOT(setBoatSize4()));
     connect(ui->boatSize5, SIGNAL(clicked(bool)), this, SLOT(setBoatSize5()));
 
-    connect(ui->tableWidget, SIGNAL(cellClicked(int,int)), this, SLOT(onCellClick(int,int)));
+    connect(ui->playerShips, SIGNAL(cellClicked(int,int)), this, SLOT(onCellClick(int,int)));
 
     connect(ui->ReadyButton, SIGNAL(clicked(bool)), this, SLOT(onReadyToPlayButtonClicked()));
     connect(ui->hitButton, SIGNAL(clicked(bool)), this, SLOT(onHitButtonClicked()));
-    connect(ui->tableWidget_2, SIGNAL(cellClicked(int, int)), this, SLOT(onOpponentCellClicked(int, int)));
+    connect(ui->opponentShips, SIGNAL(cellClicked(int, int)), this, SLOT(onOpponentCellClicked(int, int)));
+
+    connect(ui->quitButton, SIGNAL(clicked(bool)), this, SLOT(onQuitClicked()));
+
+    // set application background
+    QPixmap background(":/images/water.png");
+
+    background = background.scaled(this->size(), Qt::IgnoreAspectRatio);
+    QPalette palette;
+    palette.setBrush(QPalette::Background, background);
+    this->setPalette(palette);
 
 }
 
@@ -149,11 +163,11 @@ void MainWindow::onCellClick(int y, int x)
                 //right
                 if(x > m_x1 && m_x1 + m_boatSize - 1 <= 9){
                     for(int i = 0; i < m_boatSize; i++){
-                        cellUsed = cellUsed || ui->tableWidget->item(m_y1, m_x1 + i)->isSelected();
+                        cellUsed = cellUsed || ui->playerShips->item(m_y1, m_x1 + i)->isSelected();
                     }
                     if(!cellUsed){
                         for(int i = 0; i < m_boatSize; i++){
-                            ui->tableWidget->item(m_y1, m_x1 + i)->setSelected(true);
+                            ui->playerShips->item(m_y1, m_x1 + i)->setSelected(true);
                         }
                         reduceBoatCount();
                     }
@@ -161,11 +175,11 @@ void MainWindow::onCellClick(int y, int x)
                 //left
                 if(x < m_x1 && m_x1 - m_boatSize + 1 >= 0){
                     for(int i = 0; i < m_boatSize; i++){
-                        cellUsed = cellUsed || ui->tableWidget->item(m_y1, m_x1 - i)->isSelected();
+                        cellUsed = cellUsed || ui->playerShips->item(m_y1, m_x1 - i)->isSelected();
                     }
                     if(!cellUsed){
                         for(int i = 0; i < m_boatSize; i++){
-                            ui->tableWidget->item(m_y1, m_x1 - i)->setSelected(true);
+                            ui->playerShips->item(m_y1, m_x1 - i)->setSelected(true);
                         }
                         reduceBoatCount();
                     }
@@ -173,11 +187,11 @@ void MainWindow::onCellClick(int y, int x)
                 //down
                 if(y > m_y1 && m_y1 + m_boatSize - 1 <= 9){
                     for(int i = 0; i < m_boatSize; i++){
-                        cellUsed = cellUsed || ui->tableWidget->item(m_y1 + i, m_x1)->isSelected();
+                        cellUsed = cellUsed || ui->playerShips->item(m_y1 + i, m_x1)->isSelected();
                     }
                     if(!cellUsed){
                         for(int i = 0; i < m_boatSize; i++){
-                            ui->tableWidget->item(m_y1 + i, m_x1)->setSelected(true);
+                            ui->playerShips->item(m_y1 + i, m_x1)->setSelected(true);
                         }
                         reduceBoatCount();
                     }
@@ -185,11 +199,11 @@ void MainWindow::onCellClick(int y, int x)
                 //up
                 if(y < m_y1 && m_y1 - m_boatSize + 1 >= 0){
                     for(int i = 0; i < m_boatSize; i++){
-                        cellUsed = cellUsed || ui->tableWidget->item(m_y1 - i, m_x1)->isSelected();
+                        cellUsed = cellUsed || ui->playerShips->item(m_y1 - i, m_x1)->isSelected();
                     }
                     if(!cellUsed){
                         for(int i = 0; i < m_boatSize; i++){
-                            ui->tableWidget->item(m_y1 - i, m_x1)->setSelected(true);
+                            ui->playerShips->item(m_y1 - i, m_x1)->setSelected(true);
                         }
                         reduceBoatCount();
                     }
@@ -209,18 +223,18 @@ void MainWindow::onCellClick(int y, int x)
 
         }
         //first click
-        else if(!ui->tableWidget->item(y, x)->isSelected()){
+        else if(!ui->playerShips->item(y, x)->isSelected()){
             if(x != 0){
-                ui->tableWidget->item(y, x - 1)->setBackground(Qt::gray);
+                ui->playerShips->item(y, x - 1)->setBackground(Qt::gray);
             }
             if(x != 9){
-                ui->tableWidget->item(y, x + 1)->setBackground(Qt::gray);
+                ui->playerShips->item(y, x + 1)->setBackground(Qt::gray);
             }
             if(y != 0){
-                ui->tableWidget->item(y - 1, x)->setBackground(Qt::gray);
+                ui->playerShips->item(y - 1, x)->setBackground(Qt::gray);
             }
             if(y != 9){
-                ui->tableWidget->item(y + 1, x)->setBackground(Qt::gray);
+                ui->playerShips->item(y + 1, x)->setBackground(Qt::gray);
             }
             m_selectedCell = true;
             m_x1 = x;
@@ -256,16 +270,16 @@ void MainWindow::reduceBoatCount()
 void MainWindow::deleteGray(int y, int x){
     //right
     if(x != 9)
-        ui->tableWidget->item(y, x + 1)->setBackground(Qt::white);
+        ui->playerShips->item(y, x + 1)->setBackground(Qt::white);
     //left
     if(x != 0)
-        ui->tableWidget->item(y, x - 1)->setBackground(Qt::white);
+        ui->playerShips->item(y, x - 1)->setBackground(Qt::white);
     //down
     if(y != 9)
-        ui->tableWidget->item(y + 1, x)->setBackground(Qt::white);
+        ui->playerShips->item(y + 1, x)->setBackground(Qt::white);
     //up
     if(y != 0)
-        ui->tableWidget->item(y - 1, x)->setBackground(Qt::white);
+        ui->playerShips->item(y - 1, x)->setBackground(Qt::white);
 }
 
 
@@ -312,15 +326,11 @@ void MainWindow::recieveServerMsg()
         return;
     }
 
-    if (response.contains("attack")) {
+    if (response.contains("attack"))
         handleAttackResponse(response);
-        return;
-    }
 
-    if (response.contains("if_hit")) {
+    if (response.contains("if_hit"))
         handleIfHitResponse(response);
-        return;
-    }
 }
 
 void MainWindow::handlePlayResponse(QJsonObject & response)
@@ -335,8 +345,13 @@ void MainWindow::handlePlayResponse(QJsonObject & response)
 
     ui->teNotifications->append("Place your boats and then click on Ready.");
 
-    // player can now place ships
+    // enable disabled buttons
     ui->playerBox->setEnabled(true);
+    ui->ReadyButton->setEnabled(true);
+    ui->boatSize2->setEnabled(true);
+    ui->boatSize3->setEnabled(true);
+    ui->boatSize4->setEnabled(true);
+    ui->boatSize5->setEnabled(true);
 }
 
 void MainWindow::handleChatResponse(QJsonObject & response)
@@ -372,10 +387,10 @@ void MainWindow::handleOpponentDisconnectedResponse(QJsonObject & response)
         m_player.m_socket->write(doc.toJson());
 
         // remove player's ships
-        for(int i = 0; i < ui->tableWidget->rowCount(); ++i) {
-            for (int j = 0; j < ui->tableWidget->columnCount(); ++j)
-                if (ui->tableWidget->item(i,j)->isSelected())
-                    ui->tableWidget->item(i, j)->setSelected(false);
+        for(int i = 0; i < ui->playerShips->rowCount(); ++i) {
+            for (int j = 0; j < ui->playerShips->columnCount(); ++j)
+                if (ui->playerShips->item(i,j)->isSelected())
+                    ui->playerShips->item(i, j)->setSelected(false);
         }
 
     }
@@ -412,8 +427,91 @@ void MainWindow::handleGameStartResponse(QJsonObject &response)
    }
    else {
        m_turn = false;
-       ui->hitButton->setEnabled(false);
+       ui->hitButton->setEnabled(true);
    }
+}
+
+void MainWindow::setUiFonts()
+{
+    // include fonts
+    QFontDatabase::addApplicationFont(":/fonts/ArcadeClassic.ttf");
+
+    QFont Arcade("Arcade Classic", 16, QFont::Normal);
+
+    // main screen
+    ui->laServerIP->setFont(Arcade);
+    ui->laPlayerName->setFont(Arcade);
+
+    Arcade.setPixelSize(34);
+    ui->playButton->setFont(Arcade);
+
+    Arcade.setPixelSize(120);
+    ui->laGameTitle->setFont(Arcade);
+
+    // player's boxes
+    Arcade.setPixelSize(24);
+    ui->playerBox->setFont(Arcade);
+    ui->opponentBox->setFont(Arcade);
+
+    // available ships counters and corresponding buttons
+    Arcade.setPixelSize(18);
+    ui->laAvailableShips->setFont(Arcade);
+    ui->countSize2->setFont(Arcade);
+    ui->countSize3->setFont(Arcade);
+    ui->countSize4->setFont(Arcade);
+    ui->countSize5->setFont(Arcade);
+
+    ui->boatSize2->setFont(Arcade);
+    ui->boatSize3->setFont(Arcade);
+    ui->boatSize4->setFont(Arcade);
+    ui->boatSize5->setFont(Arcade);
+
+    // ship counters
+    Arcade.setPixelSize(24);
+    ui->laPlayersShips->setFont(Arcade);
+    ui->laPlayerShipsLeft->setFont(Arcade);
+
+    ui->laOpponentShips->setFont(Arcade);
+    ui->laOpponentShipsLeft->setFont(Arcade);
+
+    // buttons
+    ui->hitButton->setFont(Arcade);
+    ui->ReadyButton->setFont(Arcade);
+    ui->quitButton->setFont(Arcade);
+    ui->sendButton->setFont(Arcade);
+
+    // chat and notification labels
+    ui->laChat->setFont(Arcade);
+    ui->laNotifications->setFont(Arcade);
+}
+
+void MainWindow::setCellSize()
+{
+    // set player's cells width and height
+    ui->playerShips->horizontalHeader()->setMinimumSectionSize(CELL_SIZE);
+    ui->playerShips->verticalHeader()->setMinimumSectionSize(CELL_SIZE);
+    ui->playerShips->horizontalHeader()->setDefaultSectionSize(CELL_SIZE);
+    ui->playerShips->verticalHeader()->setDefaultSectionSize(CELL_SIZE);
+
+    // set opponent's cells width and height
+    ui->opponentShips->horizontalHeader()->setMinimumSectionSize(CELL_SIZE);
+    ui->opponentShips->verticalHeader()->setMinimumSectionSize(CELL_SIZE);
+    ui->opponentShips->horizontalHeader()->setDefaultSectionSize(CELL_SIZE);
+    ui->opponentShips->verticalHeader()->setDefaultSectionSize(CELL_SIZE);
+}
+
+
+void MainWindow::disablePlayerButtons()
+{
+    // disable game buttons before game starts
+    ui->playerBox->setDisabled(true);
+    ui->opponentBox->setDisabled(true);
+    ui->hitButton->setDisabled(true);
+    ui->ReadyButton->setDisabled(true);
+    ui->boatSize2->setDisabled(true);
+    ui->boatSize3->setDisabled(true);
+    ui->boatSize4->setDisabled(true);
+    ui->boatSize5->setDisabled(true);
 }
 
 
@@ -435,13 +533,13 @@ void MainWindow::onReadyToPlayButtonClicked()
         mapOfShips.insert("gameId", m_player.m_gameId);
         mapOfShips.insert("playerType", m_player.m_playerType);
 
-        for(int i=0 ; i<ui->tableWidget->rowCount(); ++i){
+        for(int i=0 ; i<ui->playerShips->rowCount(); ++i){
 
             QJsonArray niz;
 
-            for (int j = 0; j < ui->tableWidget->columnCount(); ++j) {
+            for (int j = 0; j < ui->playerShips->columnCount(); ++j) {
 
-                if(ui->tableWidget->item(i,j)->isSelected()){
+                if(ui->playerShips->item(i,j)->isSelected()){
                     niz.append(1);
                 }else{
                     niz.append(0);
@@ -461,10 +559,45 @@ void MainWindow::onReadyToPlayButtonClicked()
     }
 }
 
-void MainWindow::onOpponentCellClicked(int y, int x){
+void MainWindow::onOpponentCellClicked(int y, int x)
+{
     m_opponentSelectedCell = true;
-    m_ox = x;
-    m_oy = y;
+
+    if (m_ox == x && m_oy == y) {
+        QMessageBox msgBox;
+        msgBox.setText("You can't hit the same spot twice!");
+        msgBox.setIcon(QMessageBox::Icon::Critical);
+
+        msgBox.exec();
+
+        m_ox = -1;
+        m_oy = -1;
+    }
+    else {
+        m_ox = x;
+        m_oy = y;
+    }
+}
+
+void MainWindow::onQuitClicked()
+{
+    QMessageBox msgBox;
+    msgBox.setText("Are you sure?");
+    msgBox.setIcon(QMessageBox::Warning);
+
+    QAbstractButton* buttonYes = msgBox.addButton(tr("Yes"), QMessageBox::YesRole);
+    QAbstractButton* buttonNo = msgBox.addButton(tr("No"), QMessageBox::NoRole);
+
+    msgBox.exec();
+
+    if (msgBox.clickedButton() == buttonYes) {
+        exit(EXIT_SUCCESS);
+    }
+
+    if (msgBox.clickedButton() == buttonNo) {
+        return;
+    }
+
 }
 
 void MainWindow::onHitButtonClicked()
@@ -495,11 +628,19 @@ void MainWindow::onHitButtonClicked()
 
 void MainWindow::handleAttackResponse(QJsonObject & response)
 {
+    // read hit info
+    m_oppHitX = response.value("x").toInt();
+    m_oppHitY = response.value("y").toInt();
+
     if(response.contains("yah")){
 
         ui->teNotifications->append("You are hit!");
         m_player.m_shipsLeft--;
-        ui->shipsLeft->setText("  Ships left:" + QString::number(m_player.m_shipsLeft));
+        ui->laPlayerShipsLeft->setText(QString::number(m_player.m_shipsLeft));
+
+        // unselect ship, and color it
+        ui->playerShips->item(m_oppHitY, m_oppHitX)->setSelected(false);
+        ui->playerShips->item(m_oppHitY, m_oppHitX)->setBackgroundColor(Qt::red);
 
         if(m_player.m_shipsLeft == 0){
             QMessageBox msgBox;
@@ -514,6 +655,7 @@ void MainWindow::handleAttackResponse(QJsonObject & response)
         m_turn = true;
         ui->hitButton->setEnabled(true);
 
+        ui->playerShips->item(m_oppHitY, m_oppHitX)->setBackgroundColor(Qt::gray);
     }
 }
 
@@ -524,6 +666,7 @@ void MainWindow::handleIfHitResponse(QJsonObject & response)
         ui->hitButton->setEnabled(true);
         m_turn = true;
         ui->teNotifications->append("You hit your opponent!");
+        ui->opponentShips->item(m_oy, m_ox)->setBackgroundColor(Qt::red);
         m_player.m_greatAttack++;
 
         if(m_player.m_greatAttack == 30){
@@ -534,5 +677,6 @@ void MainWindow::handleIfHitResponse(QJsonObject & response)
         }
     }else{
         ui->teNotifications->append("You did't hit your opponent!");
+        ui->opponentShips->item(m_oy, m_ox)->setBackgroundColor(Qt::gray);
     }
 }
