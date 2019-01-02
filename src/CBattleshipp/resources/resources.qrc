@@ -1,8 +1,9 @@
 <RCC>
     <qresource prefix="/images">
-        <file>water.png</file>
+        <file>background.png</file>
+        <file>background_pixelized.png</file>
     </qresource>
     <qresource prefix="/fonts">
-        <file>ArcadeClassic.ttf</file>
+        <file>ArcadeRounded.ttf</file>
     </qresource>
 </RCC>

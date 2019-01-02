@@ -9,7 +9,7 @@
 #include <QTableWidget>
 #include <QFontDatabase>
 
-#define CELL_SIZE 40
+#define CELL_SIZE 30
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -49,13 +49,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->quitButton, SIGNAL(clicked(bool)), this, SLOT(onQuitClicked()));
 
     // set application background
-    QPixmap background(":/images/water.png");
+    QPixmap background(":/images/background.png");
 
     background = background.scaled(this->size(), Qt::IgnoreAspectRatio);
     QPalette palette;
     palette.setBrush(QPalette::Background, background);
     this->setPalette(palette);
-
 }
 
 
@@ -74,7 +73,7 @@ void MainWindow::onPlayClicked()
         connect(m_player.m_socket.get(), SIGNAL(readyRead()), this, SLOT(recieveServerMsg()));
 
         ui->displayManager->setCurrentWidget(ui->gameScreen);
-        ui->playerBox->setTitle(m_player.name());
+        ui->laTablePlayerName->setText(m_player.name());
 
         ui->teNotifications->append("Connected");
         ui->teNotifications->append("Waiting for other player to join ...");
@@ -87,6 +86,15 @@ void MainWindow::onPlayClicked()
         QJsonDocument document(request);
 
         m_player.m_socket->write(document.toJson());
+
+        // change background
+        QPixmap background(":/images/background_pixelized.png");
+
+        background = background.scaled(this->size(), Qt::IgnoreAspectRatio);
+        QPalette palette;
+        palette.setBrush(QPalette::Background, background);
+        this->setPalette(palette);
+
     }
     else {
         QMessageBox msgBox;
@@ -341,12 +349,12 @@ void MainWindow::handlePlayResponse(QJsonObject & response)
 
     // inform that other player has joined and that game has started
     ui->teNotifications->append("Player " + response.value("opp_name").toString() + " joined!");
-    ui->opponentBox->setTitle(response.value("opp_name").toString());
+    ui->laTableOpponentName->setText(response.value("opp_name").toString());
 
     ui->teNotifications->append("Place your boats and then click on Ready.");
 
     // enable disabled buttons
-    ui->playerBox->setEnabled(true);
+    ui->playerShips->setEnabled(true);
     ui->ReadyButton->setEnabled(true);
     ui->boatSize2->setEnabled(true);
     ui->boatSize3->setEnabled(true);
@@ -376,7 +384,7 @@ void MainWindow::handleOpponentDisconnectedResponse(QJsonObject & response)
     QJsonObject msg;
 
     if (msgBox.clickedButton() == buttonYes) {
-        ui->opponentBox->setTitle("Opponent name");
+        ui->laTableOpponentName->setText("Opponent name");
         ui->teNotifications->append("Wait for other player to joint the game.");
 
         msg.insert("play_again", 1);
@@ -415,7 +423,7 @@ void MainWindow::handleReadyOpponentResponse(QJsonObject &response)
 
 void MainWindow::handleGameStartResponse(QJsonObject &response)
 {
-   ui->opponentBox->setEnabled(true);
+   ui->opponentShips->setEnabled(true);
 
    ui->teNotifications->append("Game starts!");
    ui->teNotifications->append(response.value("turn").toString() + " turn.");
@@ -434,55 +442,69 @@ void MainWindow::handleGameStartResponse(QJsonObject &response)
 void MainWindow::setUiFonts()
 {
     // include fonts
-    QFontDatabase::addApplicationFont(":/fonts/ArcadeClassic.ttf");
+    QFontDatabase::addApplicationFont(":/fonts/ArcadeRounded.ttf");
 
-    QFont Arcade("Arcade Classic", 16, QFont::Normal);
+    QFont font("Arcade Rounded", 12, QFont::Normal);
 
-    // main screen
-    ui->laServerIP->setFont(Arcade);
-    ui->laPlayerName->setFont(Arcade);
+    /* *  welcome screen * */
 
-    Arcade.setPixelSize(34);
-    ui->playButton->setFont(Arcade);
+    // labels
+    ui->laServerIP->setFont(font);
+    ui->laPlayerName->setFont(font);
 
-    Arcade.setPixelSize(120);
-    ui->laGameTitle->setFont(Arcade);
+    // play button
+    font.setPixelSize(32);
+    ui->playButton->setFont(font);
 
-    // player's boxes
-    Arcade.setPixelSize(24);
-    ui->playerBox->setFont(Arcade);
-    ui->opponentBox->setFont(Arcade);
+    // game title
+    font.setPixelSize(64);
+    ui->laGameTitle->setFont(font);
+
+    /* * game screen * */
+
+    // player names
+    font.setPixelSize(12);
+    ui->laTablePlayerName->setFont(font);
+    ui->laTableOpponentName->setFont(font);
 
     // available ships counters and corresponding buttons
-    Arcade.setPixelSize(18);
-    ui->laAvailableShips->setFont(Arcade);
-    ui->countSize2->setFont(Arcade);
-    ui->countSize3->setFont(Arcade);
-    ui->countSize4->setFont(Arcade);
-    ui->countSize5->setFont(Arcade);
+    ui->laAvailableShips->setFont(font);
 
-    ui->boatSize2->setFont(Arcade);
-    ui->boatSize3->setFont(Arcade);
-    ui->boatSize4->setFont(Arcade);
-    ui->boatSize5->setFont(Arcade);
+    ui->countSize2->setFont(font);
+    ui->countSize3->setFont(font);
+    ui->countSize4->setFont(font);
+    ui->countSize5->setFont(font);
+
+    font.setPixelSize(12);
+    ui->boatSize2->setFont(font);
+    ui->boatSize3->setFont(font);
+    ui->boatSize4->setFont(font);
+    ui->boatSize5->setFont(font);
 
     // ship counters
-    Arcade.setPixelSize(24);
-    ui->laPlayersShips->setFont(Arcade);
-    ui->laPlayerShipsLeft->setFont(Arcade);
+    font.setPixelSize(12);
+    ui->laPlayersShips->setFont(font);
+    ui->laPlayerShipsLeft->setFont(font);
 
-    ui->laOpponentShips->setFont(Arcade);
-    ui->laOpponentShipsLeft->setFont(Arcade);
+    ui->laOpponentShips->setFont(font);
+    ui->laOpponentShipsLeft->setFont(font);
 
     // buttons
-    ui->hitButton->setFont(Arcade);
-    ui->ReadyButton->setFont(Arcade);
-    ui->quitButton->setFont(Arcade);
-    ui->sendButton->setFont(Arcade);
+    font.setPixelSize(12);
+    ui->hitButton->setFont(font);
+    ui->ReadyButton->setFont(font);
+    ui->quitButton->setFont(font);
+    ui->sendButton->setFont(font);
 
     // chat and notification labels
-    ui->laChat->setFont(Arcade);
-    ui->laNotifications->setFont(Arcade);
+    font.setPixelSize(12);
+    ui->laChat->setFont(font);
+    ui->laNotifications->setFont(font);
+
+    // tables
+    font.setPixelSize(8);
+    ui->playerShips->setFont(font);
+    ui->opponentShips->setFont(font);
 }
 
 void MainWindow::setCellSize()
@@ -504,8 +526,8 @@ void MainWindow::setCellSize()
 void MainWindow::disablePlayerButtons()
 {
     // disable game buttons before game starts
-    ui->playerBox->setDisabled(true);
-    ui->opponentBox->setDisabled(true);
+    ui->playerShips->setDisabled(true);
+    ui->opponentShips->setDisabled(true);
     ui->hitButton->setDisabled(true);
     ui->ReadyButton->setDisabled(true);
     ui->boatSize2->setDisabled(true);
