@@ -403,7 +403,7 @@ void MainWindow::handleOpponentDisconnectedResponse(QJsonObject & response)
 
     }
     if (msgBox.clickedButton() == buttonNo) {
-        msg.insert("quit", 1);
+        msg.insert("both_quit", 1);
         QJsonDocument doc(msg);
         m_player.m_socket->write(doc.toJson());
 

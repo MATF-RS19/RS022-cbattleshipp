@@ -82,8 +82,8 @@ void GameServer::handleRequest()
         return;
     }
 
-    if (request.contains("quit")) {
-        handlePlayAgainRequest(request);
+    if (request.contains("both_quit")) {
+        handleQuitRequest(request);
         return;
     }
 

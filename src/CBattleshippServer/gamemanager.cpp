@@ -55,6 +55,8 @@ void GameManager::removeWaitingPlayer()
     --m_playerCounter;
     auto deletedPlayer = std::move(m_waitingPlayers.back());
     deletedPlayer.release();
+
+    // if player is waiting, he must be at the back of the vector
     m_waitingPlayers.pop_back();
 }
 
