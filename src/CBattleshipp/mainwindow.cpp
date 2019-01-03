@@ -393,9 +393,10 @@ void MainWindow::handleOpponentDisconnectedResponse(QJsonObject & response)
 
         // remove player's ships
         for(int i = 0; i < ui->playerShips->rowCount(); ++i) {
-            for (int j = 0; j < ui->playerShips->columnCount(); ++j)
+            for (int j = 0; j < ui->playerShips->columnCount(); ++j) {
                 if (ui->playerShips->item(i,j)->isSelected())
                     ui->playerShips->item(i, j)->setSelected(false);
+            }
         }
 
     }
@@ -580,20 +581,11 @@ void MainWindow::onOpponentCellClicked(int y, int x)
 {
     m_opponentSelectedCell = true;
 
-    if (m_ox == x && m_oy == y) {
-        QMessageBox msgBox;
-        msgBox.setText("You can't hit the same spot twice!");
-        msgBox.setIcon(QMessageBox::Icon::Critical);
+    m_ox = x;
+    m_oy = y;
 
-        msgBox.exec();
-
-        m_ox = -1;
-        m_oy = -1;
-    }
-    else {
-        m_ox = x;
-        m_oy = y;
-    }
+    // select field that player want to hit
+    ui->opponentShips->item(m_oy, m_ox)->setSelected(true);
 }
 
 void MainWindow::onQuitClicked()
@@ -619,21 +611,42 @@ void MainWindow::onQuitClicked()
 
 void MainWindow::onHitButtonClicked()
 {
+    ui->opponentShips->item(m_oy, m_ox)->setSelected(false);
+
     if(m_opponentSelectedCell){
-           QJsonObject playerHit;
-           playerHit.insert("hit", 1);
-           playerHit.insert("x", m_ox);
-           playerHit.insert("y", m_oy);
 
-           playerHit.insert("gameId", m_player.m_gameId);
-           playerHit.insert("playerType", m_player.m_playerType);
+        // if player selected already hitted spot
+        if (ui->opponentShips->item(m_oy, m_ox)->backgroundColor() == Qt::gray ||
+            ui->opponentShips->item(m_oy, m_ox)->backgroundColor() == Qt::red ) {
+            QMessageBox msgBox;
+            msgBox.setText("You can't hit the same spot twice!");
+            msgBox.setIcon(QMessageBox::Icon::Critical);
 
-           m_turn = false;
-           ui->hitButton->setEnabled(false);
+            msgBox.exec();
 
-           QJsonDocument doc(playerHit);
-           m_player.m_socket->write(doc.toJson());
+            // reset old opponent ship coordinates
+            m_ox = -1;
+            m_oy = -1;
+        }
+        // send hit request
+        else {
+            QJsonObject playerHit;
+            playerHit.insert("hit", 1);
+            playerHit.insert("x", m_ox);
+            playerHit.insert("y", m_oy);
 
+            playerHit.insert("gameId", m_player.m_gameId);
+            playerHit.insert("playerType", m_player.m_playerType);
+
+            m_turn = false;
+            ui->hitButton->setEnabled(false);
+
+            QJsonDocument doc(playerHit);
+            m_player.m_socket->write(doc.toJson());
+
+            m_oldX = m_ox;
+            m_oldY = m_oy;
+        }
     }else{
 
         QMessageBox msgBox;

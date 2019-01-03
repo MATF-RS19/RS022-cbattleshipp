@@ -54,6 +54,9 @@ private:
     int m_ox = -1;
     int m_oy = -1;
 
+    int m_oldX = -1;
+    int m_oldY = -1;
+
     // opponent's hit coordinates
     int m_oppHitX = -1;
     int m_oppHitY = -1;
