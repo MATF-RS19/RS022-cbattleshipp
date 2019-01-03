@@ -673,10 +673,21 @@ void MainWindow::handleAttackResponse(QJsonObject & response)
         ui->playerShips->item(m_oppHitY, m_oppHitX)->setBackgroundColor(Qt::red);
 
         if(m_player.m_shipsLeft == 0){
-            QMessageBox msgBox;
-            msgBox.setText(m_player.name() + " you lost the game!");
-            msgBox.setIcon(QMessageBox::Information);
-            msgBox.exec();
+            QMessageBox::StandardButton replay = QMessageBox::question(this,"Game over" ,"You lost the game! Do you want to play again?",
+                                                                                   QMessageBox::Yes | QMessageBox::No);
+            if(replay == QMessageBox::Yes){
+                QJsonObject playAgain;
+                playAgain.insert("play_again2", 1);
+                QJsonDocument doc(playAgain);
+                m_player.m_socket->write(doc.toJson());
+
+            }else{
+                QJsonObject quit;
+                quit.insert("quit2", 1);
+                QJsonDocument doc(quit);
+                m_player.m_socket->write(doc.toJson());
+            }
+
         }
 
     }else{
@@ -698,12 +709,25 @@ void MainWindow::handleIfHitResponse(QJsonObject & response)
         ui->teNotifications->append("You hit your opponent!");
         ui->opponentShips->item(m_oy, m_ox)->setBackgroundColor(Qt::red);
         m_player.m_greatAttack++;
+        m_player.m_opponentShipsLeft--;
+        ui->laOpponentShipsLeft->setText(QString::number(m_player.m_opponentShipsLeft));
 
         if(m_player.m_greatAttack == 30){
-            QMessageBox msgBox;
-            msgBox.setText(m_player.name() + " you are winner!");
-            msgBox.setIcon(QMessageBox::Information);
-            msgBox.exec();
+            QMessageBox::StandardButton replay = QMessageBox::question(this,"Game over" ,"You won! Do you want to play again?",
+                                                                                   QMessageBox::Yes | QMessageBox::No);
+            if(replay == QMessageBox::Yes){
+                QJsonObject playAgain;
+                playAgain.insert("play_again2", 1);
+                QJsonDocument doc(playAgain);
+                m_player.m_socket->write(doc.toJson());
+
+            }else{
+                QJsonObject quit;
+                quit.insert("quit2", 1);
+                QJsonDocument doc(quit);
+                m_player.m_socket->write(doc.toJson());
+            }
+
         }
     }else{
         ui->teNotifications->append("You did't hit your opponent!");

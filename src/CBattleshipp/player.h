@@ -28,6 +28,7 @@ private:
     qint32 m_gameId;
     qint64 m_greatAttack = 0;
     qint64 m_shipsLeft = 30;
+    qint64 m_opponentShipsLeft = 30;
 
     friend class MainWindow;
 };
