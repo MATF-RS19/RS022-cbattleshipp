@@ -49,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->quitButton, SIGNAL(clicked(bool)), this, SLOT(onQuitClicked()));
 
     // set application background
-    QPixmap background(":/images/background.png");
+    QPixmap background(":/images/background_pixelized.png");
 
     background = background.scaled(this->size(), Qt::IgnoreAspectRatio);
     QPalette palette;
@@ -87,12 +87,9 @@ void MainWindow::onPlayClicked()
 
         m_player.m_socket->write(document.toJson());
 
-        // change background
-        QPixmap background(":/images/background_pixelized.png");
-
-        background = background.scaled(this->size(), Qt::IgnoreAspectRatio);
+        // change background to white
         QPalette palette;
-        palette.setBrush(QPalette::Background, background);
+        palette.setBrush(QPalette::Background, Qt::white);
         this->setPalette(palette);
 
     }
@@ -453,11 +450,11 @@ void MainWindow::setUiFonts()
     ui->laPlayerName->setFont(font);
 
     // play button
-    font.setPixelSize(32);
+    font.setPixelSize(24);
     ui->playButton->setFont(font);
 
     // game title
-    font.setPixelSize(64);
+    font.setPixelSize(70);
     ui->laGameTitle->setFont(font);
 
     /* * game screen * */
@@ -468,21 +465,21 @@ void MainWindow::setUiFonts()
     ui->laTableOpponentName->setFont(font);
 
     // available ships counters and corresponding buttons
-    ui->laAvailableShips->setFont(font);
+    font.setPixelSize(9);
+    ui->laShipsLeft->setFont(font);
 
+    font.setPixelSize(12);
     ui->countSize2->setFont(font);
     ui->countSize3->setFont(font);
     ui->countSize4->setFont(font);
     ui->countSize5->setFont(font);
 
-    font.setPixelSize(12);
     ui->boatSize2->setFont(font);
     ui->boatSize3->setFont(font);
     ui->boatSize4->setFont(font);
     ui->boatSize5->setFont(font);
 
     // ship counters
-    font.setPixelSize(12);
     ui->laPlayersShips->setFont(font);
     ui->laPlayerShipsLeft->setFont(font);
 
@@ -490,14 +487,12 @@ void MainWindow::setUiFonts()
     ui->laOpponentShipsLeft->setFont(font);
 
     // buttons
-    font.setPixelSize(12);
     ui->hitButton->setFont(font);
     ui->ReadyButton->setFont(font);
     ui->quitButton->setFont(font);
     ui->sendButton->setFont(font);
 
     // chat and notification labels
-    font.setPixelSize(12);
     ui->laChat->setFont(font);
     ui->laNotifications->setFont(font);
 
