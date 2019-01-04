@@ -419,7 +419,8 @@ void MainWindow::handleOpponentDisconnectedResponse(QJsonObject & response)
         msg.insert("play_again", 1);
         msg.insert("player_type", m_player.m_playerType);
         msg.insert("game_id", m_player.m_gameId);
-        msg.insert("game_outcome", -1);
+
+        msg.insert("game_outcome", GameOutcome::FAILURE);
 
         QJsonDocument doc(msg);
         m_player.m_socket->write(doc.toJson());
@@ -713,8 +714,7 @@ void MainWindow::handleAttackResponse(QJsonObject & response)
                 playAgain.insert("player_type", m_player.m_playerType);
                 playAgain.insert("game_id", m_player.m_gameId);
 
-                // game outcome -2 = game successfully ended
-                playAgain.insert("game_outcome", -2);
+                playAgain.insert("game_outcome", GameOutcome::SUCCESSFUL);
                 QJsonDocument doc(playAgain);
                 m_player.m_socket->write(doc.toJson());
 
@@ -757,8 +757,7 @@ void MainWindow::handleIfHitResponse(QJsonObject & response)
                 playAgain.insert("player_type", m_player.m_playerType);
                 playAgain.insert("game_id", m_player.m_gameId);
 
-                // game outcome -2 = game successfully ended
-                playAgain.insert("game_outcome", -2);
+                playAgain.insert("game_outcome", GameOutcome::SUCCESSFUL);
                 QJsonDocument doc(playAgain);
                 m_player.m_socket->write(doc.toJson());
 

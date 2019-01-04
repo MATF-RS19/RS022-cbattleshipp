@@ -11,6 +11,11 @@ namespace Ui {
 class MainWindow;
 }
 
+enum GameOutcome {
+    SUCCESSFUL = 42,
+    FAILURE = -1
+};
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
