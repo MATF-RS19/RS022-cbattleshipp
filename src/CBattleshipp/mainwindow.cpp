@@ -374,6 +374,26 @@ void MainWindow::recieveServerMsg()
         handleIfHitResponse(response);
 }
 
+void MainWindow::handleQuit()
+{
+    QMessageBox msgBox;
+    msgBox.setText("Are you sure?");
+    msgBox.setIcon(QMessageBox::Warning);
+
+    QAbstractButton* buttonYes = msgBox.addButton(tr("Yes"), QMessageBox::YesRole);
+    QAbstractButton* buttonNo = msgBox.addButton(tr("No"), QMessageBox::NoRole);
+
+    msgBox.exec();
+
+    if (msgBox.clickedButton() == buttonYes) {
+        QApplication::quit();
+    }
+
+    if (msgBox.clickedButton() == buttonNo) {
+        return;
+    }
+}
+
 void MainWindow::handlePlayResponse(QJsonObject & response)
 {
     // set player type and game id
@@ -443,8 +463,6 @@ void MainWindow::handleReadyOpponentResponse(QJsonObject &response)
 
 void MainWindow::handleGameStartResponse(QJsonObject &response)
 {
-
-
    ui->teNotifications->append("Game starts!");
    ui->teNotifications->append(response.value("turn").toString() + " turn.");
 
@@ -555,6 +573,11 @@ void MainWindow::disablePlayerButtons()
     ui->boatSize5->setDisabled(true);
 }
 
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    handleQuit();
+}
+
 
 void MainWindow::onReadyToPlayButtonClicked()
 {
@@ -622,23 +645,7 @@ void MainWindow::onOpponentCellClicked(int y, int x)
 
 void MainWindow::onQuitClicked()
 {
-    QMessageBox msgBox;
-    msgBox.setText("Are you sure?");
-    msgBox.setIcon(QMessageBox::Warning);
-
-    QAbstractButton* buttonYes = msgBox.addButton(tr("Yes"), QMessageBox::YesRole);
-    QAbstractButton* buttonNo = msgBox.addButton(tr("No"), QMessageBox::NoRole);
-
-    msgBox.exec();
-
-    if (msgBox.clickedButton() == buttonYes) {
-        QApplication::quit();
-    }
-
-    if (msgBox.clickedButton() == buttonNo) {
-        return;
-    }
-
+    handleQuit();
 }
 
 void MainWindow::onHitButtonClicked()
@@ -705,7 +712,7 @@ void MainWindow::handleAttackResponse(QJsonObject & response)
         ui->playerShips->item(m_oppHitY, m_oppHitX)->setBackgroundColor(Qt::red);
 
         if(m_player.m_shipsLeft == 0){
-            QMessageBox::StandardButton replay = QMessageBox::question(this,"Game over" ,"You lost the game! Do you want to play again?",
+            QMessageBox::StandardButton replay = QMessageBox::question(this,"Game over" ,"You lost the game! Rematch?",
                                                                                    QMessageBox::Yes | QMessageBox::No);
             if(replay == QMessageBox::Yes){
                 resetUi();
@@ -749,7 +756,7 @@ void MainWindow::handleIfHitResponse(QJsonObject & response)
         ui->laOpponentShipsLeft->setText(QString::number(m_player.m_opponentShipsLeft));
 
         if(m_player.m_greatAttack == 30){
-            QMessageBox::StandardButton replay = QMessageBox::question(this,"Game over" ,"VICTORY! Do you want to play again?",
+            QMessageBox::StandardButton replay = QMessageBox::question(this,"Game over" ,"VICTORY! Rematch?",
                                                                                    QMessageBox::Yes | QMessageBox::No);
             if(replay == QMessageBox::Yes){
                 resetUi();

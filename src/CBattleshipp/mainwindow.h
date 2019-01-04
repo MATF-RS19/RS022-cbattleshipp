@@ -75,6 +75,7 @@ private:
     bool m_turn = false;
 
 
+    void handleQuit();
     void deleteGray(int y, int x);
     void reduceBoatCount();
     void resetUi();
@@ -95,6 +96,10 @@ private:
     void setUiFonts();
     void setCellSize();
     void disablePlayerButtons();
+
+    // QWidget interface
+protected:
+    void closeEvent(QCloseEvent *event);
 };
 
 #endif // MAINWINDOW_H

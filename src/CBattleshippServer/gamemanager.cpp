@@ -38,7 +38,6 @@ void GameManager::addToWaitingList(std::unique_ptr<Player> && player)
     //	start a new game for players who want to play a new game
     if (m_playerCounter % 2 == 0 &&
             m_waitingPlayers.back()->m_playerType == PlayerType::PLAY_AGAIN) {
-        qDebug() << "IT SHOULD START!!!";
         startGame();
     }
 }

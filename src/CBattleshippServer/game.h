@@ -9,8 +9,6 @@
 
 #include <memory>
 
-#define SHIP_NUM 30
-
 class Game : public QObject
 {
     Q_OBJECT
@@ -29,9 +27,6 @@ private:
 
     // if gameId is -1, game is ended
     qint32 m_gameId = 0;
-
-    quint16 m_player1ShipsLeft = SHIP_NUM;
-    quint16 m_player2ShipsLeft = SHIP_NUM;
 
     friend class GameManager;
     friend class GameServer;
