@@ -272,6 +272,42 @@ void MainWindow::reduceBoatCount()
     }
 }
 
+void MainWindow::resetUi()
+{
+    disablePlayerButtons();
+
+    ui->teChat->clear();
+
+    // reset notifications
+    ui->teNotifications->clear();
+    ui->teNotifications->append("Wait for other player to joint the game.");
+
+    // reset player's ships
+    for(int i = 0; i < ui->playerShips->rowCount(); ++i) {
+        for (int j = 0; j < ui->playerShips->columnCount(); ++j) {
+            if (ui->playerShips->item(i, j)->isSelected())
+                ui->playerShips->item(i, j)->setSelected(false);
+        }
+    }
+
+
+    for(int i = 0; i < ui->playerShips->rowCount(); ++i) {
+        for (int j = 0; j < ui->playerShips->columnCount(); ++j) {
+            ui->playerShips->item(i, j)->setBackgroundColor(Qt::white);
+        }
+    }
+
+    // reset opponent's ships
+    ui->laTableOpponentName->setText("Opponent name");
+
+    for(int i = 0; i < ui->opponentShips->rowCount(); ++i) {
+        for (int j = 0; j < ui->opponentShips->columnCount(); ++j) {
+            ui->opponentShips->item(i, j)->setBackgroundColor(Qt::white);
+        }
+    }
+
+}
+
 void MainWindow::deleteGray(int y, int x){
     //right
     if(x != 9)
@@ -373,37 +409,23 @@ void MainWindow::handleOpponentDisconnectedResponse(QJsonObject & response)
     QAbstractButton* buttonYes = msgBox.addButton(tr("Yes"), QMessageBox::YesRole);
     QAbstractButton* buttonNo = msgBox.addButton(tr("Quit"), QMessageBox::NoRole);
 
-    ui->teNotifications->clear();
-    ui->teChat->clear();
-
     msgBox.exec();
 
     QJsonObject msg;
 
     if (msgBox.clickedButton() == buttonYes) {
-        ui->laTableOpponentName->setText("Opponent name");
-        ui->teNotifications->append("Wait for other player to joint the game.");
+        resetUi();
 
         msg.insert("play_again", 1);
         msg.insert("player_type", m_player.m_playerType);
         msg.insert("game_id", m_player.m_gameId);
+        msg.insert("game_outcome", -1);
 
         QJsonDocument doc(msg);
         m_player.m_socket->write(doc.toJson());
-
-        // remove player's ships
-        for(int i = 0; i < ui->playerShips->rowCount(); ++i) {
-            for (int j = 0; j < ui->playerShips->columnCount(); ++j) {
-                if (ui->playerShips->item(i,j)->isSelected())
-                    ui->playerShips->item(i, j)->setSelected(false);
-            }
-        }
-
     }
-    if (msgBox.clickedButton() == buttonNo) {
-        QJsonDocument doc(msg);
-        m_player.m_socket->write(doc.toJson());
 
+    if (msgBox.clickedButton() == buttonNo) {
         QApplication::quit();
     }
 }
@@ -580,8 +602,17 @@ void MainWindow::onOpponentCellClicked(int y, int x)
 {
     m_opponentSelectedCell = true;
 
+    // check if player selected multiple cells
+    for(int i = 0; i < ui->opponentShips->rowCount(); ++i) {
+        for (int j = 0; j < ui->opponentShips->columnCount(); ++j) {
+            if (ui->opponentShips->item(i,j)->isSelected())
+                ui->opponentShips->item(i, j)->setSelected(false);
+        }
+    }
+
     m_ox = x;
     m_oy = y;
+
 
     // select field that player want to hit
     ui->opponentShips->item(m_oy, m_ox)->setSelected(true);
@@ -675,10 +706,15 @@ void MainWindow::handleAttackResponse(QJsonObject & response)
             QMessageBox::StandardButton replay = QMessageBox::question(this,"Game over" ,"You lost the game! Do you want to play again?",
                                                                                    QMessageBox::Yes | QMessageBox::No);
             if(replay == QMessageBox::Yes){
+                resetUi();
+
                 QJsonObject playAgain;
                 playAgain.insert("play_again", 1);
                 playAgain.insert("player_type", m_player.m_playerType);
                 playAgain.insert("game_id", m_player.m_gameId);
+
+                // game outcome -2 = game successfully ended
+                playAgain.insert("game_outcome", -2);
                 QJsonDocument doc(playAgain);
                 m_player.m_socket->write(doc.toJson());
 
@@ -714,10 +750,15 @@ void MainWindow::handleIfHitResponse(QJsonObject & response)
             QMessageBox::StandardButton replay = QMessageBox::question(this,"Game over" ,"VICTORY! Do you want to play again?",
                                                                                    QMessageBox::Yes | QMessageBox::No);
             if(replay == QMessageBox::Yes){
+                resetUi();
+
                 QJsonObject playAgain;
                 playAgain.insert("play_again", 1);
                 playAgain.insert("player_type", m_player.m_playerType);
                 playAgain.insert("game_id", m_player.m_gameId);
+
+                // game outcome -2 = game successfully ended
+                playAgain.insert("game_outcome", -2);
                 QJsonDocument doc(playAgain);
                 m_player.m_socket->write(doc.toJson());
 

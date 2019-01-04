@@ -72,6 +72,7 @@ private:
 
     void deleteGray(int y, int x);
     void reduceBoatCount();
+    void resetUi();
 
     // server handle response methods
     void handlePlayResponse(QJsonObject & response);

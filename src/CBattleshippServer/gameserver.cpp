@@ -163,7 +163,7 @@ void GameServer::handlePlayAgainRequest(QJsonObject &request)
                 game.m_player1->m_playerType = PlayerType::PLAY_AGAIN;
                 m_gm.addToWaitingList(std::move(game.m_player1));
 
-                game.m_gameId = -1;
+                game.m_gameId = request.value("game_outcome").toInt();
 
                 return;
             }
@@ -171,7 +171,7 @@ void GameServer::handlePlayAgainRequest(QJsonObject &request)
                 game.m_player2->m_playerType = PlayerType::PLAY_AGAIN;
                 m_gm.addToWaitingList(std::move(game.m_player2));
 
-                game.m_gameId = -1;
+                game.m_gameId = request.value("game_outcome").toInt();
 
                 return;
             }
@@ -202,7 +202,7 @@ void GameServer::handleReadyRequest(QJsonObject &request)
             response.insert("start_game", 1);
 
             // set first player turn
-            if (player->m_playerType == 1)
+            if (player->m_playerType == PlayerType::PLAYER1)
                 response.insert("turn", player->m_name);
             else {
                 response.insert("turn", opp->m_name);
