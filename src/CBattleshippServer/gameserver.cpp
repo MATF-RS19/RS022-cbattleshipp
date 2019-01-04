@@ -204,10 +204,12 @@ void GameServer::handleReadyRequest(QJsonObject &request)
             response.insert("start_game", 1);
 
             // set first player turn
-            if (player->m_playerType == PlayerType::PLAYER1)
+            if (player->m_playerType == PlayerType::PLAYER1){
                 response.insert("turn", player->m_name);
-            else {
+                response.insert("player_type" , player->m_playerType);
+            }else {
                 response.insert("turn", opp->m_name);
+                response.insert("player_type" , player->m_playerType);
             }
 
             QJsonDocument msg(response);

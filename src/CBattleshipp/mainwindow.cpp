@@ -443,7 +443,7 @@ void MainWindow::handleReadyOpponentResponse(QJsonObject &response)
 
 void MainWindow::handleGameStartResponse(QJsonObject &response)
 {
-   ui->opponentShips->setEnabled(true);
+
 
    ui->teNotifications->append("Game starts!");
    ui->teNotifications->append(response.value("turn").toString() + " turn.");
@@ -451,11 +451,12 @@ void MainWindow::handleGameStartResponse(QJsonObject &response)
    // set player turn
    if (!response.value("turn").toString().compare(m_player.m_name)) {
        m_turn = true;
-
+       ui->opponentShips->setEnabled(true);
+       ui->hitButton->setEnabled(true);
    }
    else {
        m_turn = false;
-       ui->hitButton->setEnabled(true);
+       ui->hitButton->setEnabled(false);
    }
 }
 
@@ -729,6 +730,7 @@ void MainWindow::handleAttackResponse(QJsonObject & response)
         ui->teNotifications->append("You are not hit!");
         m_turn = true;
         ui->hitButton->setEnabled(true);
+        ui->opponentShips->setEnabled(true);
 
         ui->playerShips->item(m_oppHitY, m_oppHitX)->setBackgroundColor(Qt::gray);
     }
@@ -768,6 +770,7 @@ void MainWindow::handleIfHitResponse(QJsonObject & response)
         }
     }else{
         ui->teNotifications->append("You did't hit your opponent!");
+        ui->opponentShips->setEnabled(false);
         ui->opponentShips->item(m_oy, m_ox)->setBackgroundColor(Qt::gray);
     }
 }
