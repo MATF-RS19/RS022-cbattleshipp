@@ -49,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->quitButton, SIGNAL(clicked(bool)), this, SLOT(onQuitClicked()));
 
     // set application background
-    QPixmap background(":/images/background_pixelized.png");
+    QPixmap background(":/images/background.png");
 
     background = background.scaled(this->size(), Qt::IgnoreAspectRatio);
     QPalette palette;
@@ -86,12 +86,6 @@ void MainWindow::onPlayClicked()
         QJsonDocument document(request);
 
         m_player.m_socket->write(document.toJson());
-
-        // change background to white
-        QPalette palette;
-        palette.setBrush(QPalette::Background, Qt::white);
-        this->setPalette(palette);
-
     }
     else {
         QMessageBox msgBox;
@@ -272,9 +266,10 @@ void MainWindow::reduceBoatCount()
     }
 }
 
-void MainWindow::resetUi()
+void MainWindow::resetGameUi()
 {
     disablePlayerButtons();
+
 
     ui->teChat->clear();
 
@@ -283,29 +278,44 @@ void MainWindow::resetUi()
     ui->teNotifications->append("Wait for other player to joint the game.");
 
     // reset player's ships
-    for(int i = 0; i < ui->playerShips->rowCount(); ++i) {
+    for (int i = 0; i < ui->playerShips->rowCount(); ++i) {
         for (int j = 0; j < ui->playerShips->columnCount(); ++j) {
             if (ui->playerShips->item(i, j)->isSelected())
                 ui->playerShips->item(i, j)->setSelected(false);
         }
     }
 
-
-    for(int i = 0; i < ui->playerShips->rowCount(); ++i) {
+    for (int i = 0; i < ui->playerShips->rowCount(); ++i) {
         for (int j = 0; j < ui->playerShips->columnCount(); ++j) {
             ui->playerShips->item(i, j)->setBackgroundColor(Qt::white);
         }
     }
 
+    // reset ship counters
+    m_availableShipsSize2 = 4;
+    m_availableShipsSize3 = 3;
+    m_availableShipsSize4 = 2;
+    m_availableShipsSize5 = 1;
+
+    ui->countSize2->setText(QString::number(4));
+    ui->countSize3->setText(QString::number(3));
+    ui->countSize4->setText(QString::number(2));
+    ui->countSize5->setText(QString::number(1));
+
+    m_player.m_shipsLeft = 30;
+    ui->laPlayerShipsLeft->setText(QString::number(30));
+
     // reset opponent's ships
     ui->laTableOpponentName->setText("Opponent name");
 
-    for(int i = 0; i < ui->opponentShips->rowCount(); ++i) {
+    m_player.m_opponentShipsLeft = 30;
+    ui->laOpponentShipsLeft->setText(QString::number(30));
+
+    for (int i = 0; i < ui->opponentShips->rowCount(); ++i) {
         for (int j = 0; j < ui->opponentShips->columnCount(); ++j) {
             ui->opponentShips->item(i, j)->setBackgroundColor(Qt::white);
         }
     }
-
 }
 
 void MainWindow::deleteGray(int y, int x){
@@ -434,7 +444,7 @@ void MainWindow::handleOpponentDisconnectedResponse(QJsonObject & response)
     QJsonObject msg;
 
     if (msgBox.clickedButton() == buttonYes) {
-        resetUi();
+        resetGameUi();
 
         msg.insert("play_again", 1);
         msg.insert("player_type", m_player.m_playerType);
@@ -693,6 +703,8 @@ void MainWindow::onHitButtonClicked()
         msgBox.setIcon(QMessageBox::Information);
         msgBox.exec();
     }
+
+    m_opponentSelectedCell = false;
 }
 
 void MainWindow::handleAttackResponse(QJsonObject & response)
@@ -715,7 +727,7 @@ void MainWindow::handleAttackResponse(QJsonObject & response)
             QMessageBox::StandardButton replay = QMessageBox::question(this,"Game over" ,"You lost the game! Rematch?",
                                                                                    QMessageBox::Yes | QMessageBox::No);
             if(replay == QMessageBox::Yes){
-                resetUi();
+                resetGameUi();
 
                 QJsonObject playAgain;
                 playAgain.insert("play_again", 1);
@@ -759,7 +771,7 @@ void MainWindow::handleIfHitResponse(QJsonObject & response)
             QMessageBox::StandardButton replay = QMessageBox::question(this,"Game over" ,"VICTORY! Rematch?",
                                                                                    QMessageBox::Yes | QMessageBox::No);
             if(replay == QMessageBox::Yes){
-                resetUi();
+                resetGameUi();
 
                 QJsonObject playAgain;
                 playAgain.insert("play_again", 1);

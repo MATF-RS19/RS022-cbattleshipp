@@ -38,6 +38,7 @@ private:
     uint8_t m_playerType = PlayerType::NEW;
 
     int m_playerId = 0;
+    qint32 m_gameId = 0;
 
     friend class GameServer;
     friend class GameManager;

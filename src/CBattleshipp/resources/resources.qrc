@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/images">
-        <file>background_pixelized.png</file>
+        <file>background.png</file>
     </qresource>
     <qresource prefix="/fonts">
         <file>ArcadeRounded.ttf</file>

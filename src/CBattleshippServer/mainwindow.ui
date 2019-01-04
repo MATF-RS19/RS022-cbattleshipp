@@ -7,11 +7,14 @@
     <x>0</x>
     <y>0</y>
     <width>330</width>
-    <height>360</height>
+    <height>330</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Server</string>
+  </property>
+  <property name="toolButtonStyle">
+   <enum>Qt::ToolButtonTextOnly</enum>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">

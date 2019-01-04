@@ -10,7 +10,8 @@ Player::Player(Player &&other)
     : m_socket(std::move(other.m_socket)),
       m_name(std::move(other.m_name)),
       m_playerType(other.m_playerType),
-      m_playerId(other.m_playerId)
+      m_playerId(other.m_playerId),
+      m_gameId(other.m_gameId)
 {}
 
 

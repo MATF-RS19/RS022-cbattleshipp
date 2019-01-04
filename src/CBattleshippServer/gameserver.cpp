@@ -102,20 +102,20 @@ void GameServer::playerDisconnected()
 {
     QTcpSocket *socket = static_cast<QTcpSocket*>(sender());
 
-    auto oppSocket= m_gm.opponentSocket(socket->socketDescriptor());
+    auto opp = m_gm.opponent(socket->socketDescriptor());
     auto player = m_gm.findPlayer(socket->socketDescriptor());
 
+    // remove player from game
+    m_gm.removePlayer(player);
+
     // if player was in a game, send opponent disconnected response
-    if (oppSocket != nullptr) {
+    if (opp != nullptr) {
         QJsonObject msg;
         msg.insert("od", 1);
         QJsonDocument doc(msg);
 
-        oppSocket->write(doc.toJson());
+        opp->m_socket->write(doc.toJson());
     }
-
-    // remove player from game
-    m_gm.removePlayer(player);
 
     emit log("Player disconnected");
 }
@@ -141,14 +141,14 @@ void GameServer::handleChatRequest(QJsonObject & request)
     qDebug() << "Sending: " << doc.toJson();
 
     if (request.value("player_type").toInt() == PLAYER1) {
-        auto socket = m_gm.opponentSocket(PLAYER1, request.value("game_id").toInt());
-        if (socket != nullptr)
-            socket->write(doc.toJson());
+        auto opp = m_gm.opponent(PLAYER1, request.value("game_id").toInt());
+        if (opp != nullptr)
+            opp->m_socket->write(doc.toJson());
     }
     else {
-        auto socket = m_gm.opponentSocket(PLAYER2, request.value("game_id").toInt());
-        if (socket != nullptr)
-            socket->write(doc.toJson());
+        auto opp = m_gm.opponent(PLAYER2, request.value("game_id").toInt());
+        if (opp != nullptr)
+            opp->m_socket->write(doc.toJson());
     }
 }
 
@@ -159,21 +159,29 @@ void GameServer::handlePlayAgainRequest(QJsonObject &request)
         if (game.m_gameId == request.value("game_id").toInt() && game.m_gameId != -1) {
 
             if (request.value("player_type").toInt() == PlayerType::PLAYER1) {
+                // game ended with one player quiting
+                if (request.value("game_outcome").toInt() == -1)
+                    game.m_gameId = request.value("game_outcome").toInt();
+
+                if (request.value("game_outcome").toInt() == 42 &&
+                    m_gm.opponent(PLAYER1, game.m_gameId) == nullptr)
+                    game.m_gameId = -1;
 
                 game.m_player1->m_playerType = PlayerType::PLAY_AGAIN;
                 m_gm.addToWaitingList(std::move(game.m_player1));
 
-                if (request.value("game_outcome").toInt() == -1)
-                    game.m_gameId = request.value("game_outcome").toInt();
-
                 return;
             }
             else {
-                game.m_player2->m_playerType = PlayerType::PLAY_AGAIN;
-                m_gm.addToWaitingList(std::move(game.m_player2));
-
                 if (request.value("game_outcome").toInt() == -1)
                     game.m_gameId = request.value("game_outcome").toInt();
+
+                if (request.value("game_outcome").toInt() == 42 &&
+                    m_gm.opponent(PLAYER2, game.m_gameId) == nullptr)
+                    game.m_gameId = -1;
+
+                game.m_player2->m_playerType = PlayerType::PLAY_AGAIN;
+                m_gm.addToWaitingList(std::move(game.m_player2));
 
                 return;
             }

@@ -49,10 +49,14 @@ Player *GameManager::findIngamePlayer(int playerType, int gameId) const
 {
     for (auto & game : m_activeGames) {
         if (game.m_gameId == gameId) {
-            if (game.m_player1->m_playerType == playerType)
-                return  game.m_player1.get();
-            else
-                return game.m_player2.get();
+            if (game.m_player1 != nullptr) {
+                if (game.m_player1->m_playerType == playerType)
+                    return game.m_player1.get();
+            }
+            if (game.m_player2 != nullptr) {
+                if (game.m_player2->m_playerType == playerType)
+                    return game.m_player2.get();
+            }
         }
     }
 
@@ -67,10 +71,16 @@ Player *GameManager::findPlayer(qintptr sd) const
     }
 
     for (auto & game : m_activeGames) {
-        if (sd == game.m_player1->m_socket.get()->socketDescriptor())
-            return game.m_player1.get();
-        else if (sd == game.m_player2->m_socket.get()->socketDescriptor())
-            return game.m_player2.get();
+        if (game.m_gameId != -1) {
+            if (game.m_player1 != nullptr) {
+                if (game.m_player1->m_socket->socketDescriptor() == sd)
+                    return game.m_player1.get();
+            }
+            else if (game.m_player2 != nullptr) {
+                if (game.m_player2->m_socket->socketDescriptor() == sd)
+                    return game.m_player2.get();
+            }
+        }
     }
 
     return nullptr;
@@ -80,12 +90,19 @@ Player *GameManager::opponent(int playerType, int gameId) const
 {
     for (auto & game : m_activeGames) {
         if (game.m_gameId == gameId && game.m_gameId != -1) {
-            if (game.m_player1->m_playerType == playerType &&
-                game.m_player2->m_playerType != PlayerType::DELETED)
-                return  game.m_player2.get();
-            else if (game.m_player2->m_playerType == playerType &&
-                     game.m_player1->m_playerType != PlayerType::DELETED)
-                return game.m_player1.get();
+            if (playerType == PLAYER1) {
+                if (game.m_player2 == nullptr)
+                    return nullptr;
+                else if (game.m_player2->m_playerType != DELETED)
+                    return game.m_player2.get();
+            }
+
+            if (playerType == PLAYER2) {
+                if (game.m_player1 == nullptr)
+                    return nullptr;
+                else if (game.m_player1->m_playerType != DELETED)
+                    return game.m_player1.get();
+            }
         }
     }
 
@@ -95,15 +112,26 @@ Player *GameManager::opponent(int playerType, int gameId) const
 
 Player *GameManager::opponent(qintptr sd) const
 {
+    auto player = findPlayer(sd);
+
+    if (player == nullptr)
+        return nullptr;
+
     for (auto & game : m_activeGames) {
-        if (game.m_gameId != -1) {
-            if (sd == game.m_player1->m_socket.get()->socketDescriptor() &&
-                    game.m_player2->m_playerType != PlayerType::DELETED) {
-                return game.m_player2.get();
+        if (player->m_gameId == game.m_gameId && game.m_gameId != -1) {
+            if (player->m_playerType == PLAYER1) {
+                if (game.m_player2 == nullptr)
+                    return nullptr;
+                else if (game.m_player2->m_playerType != DELETED) {
+                    return game.m_player2.get();
+                }
             }
-            else if (sd == game.m_player2->m_socket.get()->socketDescriptor() &&
-                     game.m_player1->m_playerType != PlayerType::DELETED) {
-                return game.m_player1.get();
+            if (player->m_playerType == PLAYER2) {
+                if (game.m_player1 == nullptr)
+                    return nullptr;
+                else if (game.m_player1->m_playerType != DELETED) {
+                    return game.m_player1.get();
+                }
             }
         }
     }
@@ -138,16 +166,11 @@ void GameManager::removePlayer(Player *player)
     // player is in a game
     else {
         for (auto & game : m_activeGames) {
-            if (game.m_player1->m_playerId == player->m_playerId) {
-                // mark player for deletion
-                game.m_player1->m_playerType = PlayerType::DELETED;
-
-                return;
-            }
-            else if (game.m_player2->m_playerId == player->m_playerId) {
-                // mark player for deletion
-                game.m_player2->m_playerType = PlayerType::DELETED;
-                return;
+            if (game.m_gameId == player->m_gameId) {
+                if (player->m_playerType == PLAYER1)
+                    game.m_player1->m_playerType = PlayerType::DELETED;
+                else if (player->m_playerType == PLAYER2)
+                    game.m_player2->m_playerType = PlayerType::DELETED;
             }
         }
     }
@@ -171,6 +194,11 @@ void GameManager::startGame()
 
     player1->m_playerType = PlayerType::PLAYER1;
     player2->m_playerType = PlayerType::PLAYER2;
+
+    // set player's game id
+    player1->m_gameId = m_gameCounter;
+    player2->m_gameId = m_gameCounter;
+
 
     // send opponent info
     QJsonObject msg1;
