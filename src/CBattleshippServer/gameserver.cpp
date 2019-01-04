@@ -37,6 +37,8 @@ void GameServer::startServer()
 
 void GameServer::incomingConnection(qintptr handle)
 {
+    ++m_playerIdGenerator;
+
     // create new player
     std::unique_ptr<Player> player = std::make_unique<Player>();
     std::unique_ptr<QTcpSocket> playerSocket = std::make_unique<QTcpSocket>(this);
@@ -44,6 +46,8 @@ void GameServer::incomingConnection(qintptr handle)
     // set up player socket
     player->m_socket = std::move(playerSocket);
     player->m_socket->setSocketDescriptor(handle);
+
+    player->m_playerId = m_playerIdGenerator;
 
     connect(player->m_socket.get(), SIGNAL(readyRead()), this, SLOT(handleRequest()));
     connect(player->m_socket.get(), SIGNAL(disconnected()), this, SLOT(playerDisconnected()));
@@ -82,11 +86,6 @@ void GameServer::handleRequest()
         return;
     }
 
-    if (request.contains("both_quit")) {
-        handleQuitRequest(request);
-        return;
-    }
-
     if (request.contains("ready")) {
         handleReadyRequest(request);
         return;
@@ -103,21 +102,21 @@ void GameServer::playerDisconnected()
 {
     QTcpSocket *socket = static_cast<QTcpSocket*>(sender());
 
-    auto oppSocket = m_gm.opponentSocket(socket->socketDescriptor());
+    auto oppSocket= m_gm.opponentSocket(socket->socketDescriptor());
+    auto player = m_gm.findPlayer(socket->socketDescriptor());
 
     // if player was in a game, send opponent disconnected response
     if (oppSocket != nullptr) {
         QJsonObject msg;
         msg.insert("od", 1);
         QJsonDocument doc(msg);
-        oppSocket->write(doc.toJson());
 
-    } // player left before playing a game
-    else {
-        m_gm.removeWaitingPlayer();
+        oppSocket->write(doc.toJson());
     }
 
-    socket->disconnectFromHost();
+    // remove player from game
+    m_gm.removePlayer(player);
+
     emit log("Player disconnected");
 }
 
@@ -141,13 +140,13 @@ void GameServer::handleChatRequest(QJsonObject & request)
 
     qDebug() << "Sending: " << doc.toJson();
 
-    if (request.value("player_type").toInt() == 1) {
-        auto socket = m_gm.opponentSocket(1, request.value("game_id").toInt());
+    if (request.value("player_type").toInt() == PLAYER1) {
+        auto socket = m_gm.opponentSocket(PLAYER1, request.value("game_id").toInt());
         if (socket != nullptr)
             socket->write(doc.toJson());
     }
     else {
-        auto socket = m_gm.opponentSocket(2, request.value("game_id").toInt());
+        auto socket = m_gm.opponentSocket(PLAYER2, request.value("game_id").toInt());
         if (socket != nullptr)
             socket->write(doc.toJson());
     }
@@ -156,39 +155,26 @@ void GameServer::handleChatRequest(QJsonObject & request)
 
 void GameServer::handlePlayAgainRequest(QJsonObject &request)
 {
-    for (auto i = std::begin(m_gm.m_activeGames); i != std::end(m_gm.m_activeGames); ++i) {
-        if (i->m_player1->m_playerType == request.value("player_type").toInt()) {
-                i->m_player1->m_ships.empty();
-                m_gm.addToWaitingList(std::move(i->m_player1));
+    for (auto & game : m_gm.m_activeGames) {
+        if (game.m_gameId == request.value("game_id").toInt() && game.m_gameId != -1) {
 
-                i->m_player2.release();
-                m_gm.m_activeGames.erase(i);
+            if (request.value("player_type").toInt() == PlayerType::PLAYER1) {
 
-                break;
-        }
-        else if (i->m_player2->m_playerType == request.value("player_type").toInt()) {
-                i->m_player2->m_ships.empty();
-                m_gm.addToWaitingList(std::move(i->m_player2));
+                game.m_player1->m_playerType = PlayerType::PLAY_AGAIN;
+                m_gm.addToWaitingList(std::move(game.m_player1));
 
-                i->m_player1.release();
-                m_gm.m_activeGames.erase(i);
+                game.m_gameId = -1;
 
-                break;
-        }
-    }
-}
+                return;
+            }
+            else {
+                game.m_player2->m_playerType = PlayerType::PLAY_AGAIN;
+                m_gm.addToWaitingList(std::move(game.m_player2));
 
+                game.m_gameId = -1;
 
-// delete players who left the game
-void GameServer::handleQuitRequest(QJsonObject &request)
-{
-    for (auto i = std::begin(m_gm.m_activeGames); i != std::end(m_gm.m_activeGames); ++i) {
-        if (i->m_player1->m_playerType == request.value("player_type").toInt() ||
-            i->m_player2->m_playerType == request.value("player_type").toInt()) {
-                i->m_player1.release();
-                i->m_player2.release();
-                m_gm.m_activeGames.erase(i);
-                break;
+                return;
+            }
         }
     }
 }

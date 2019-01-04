@@ -27,6 +27,7 @@ private:
     std::unique_ptr<Player> m_player1;
     std::unique_ptr<Player> m_player2;
 
+    // if gameId is -1, game is ended
     qint32 m_gameId = 0;
 
     quint16 m_player1ShipsLeft = SHIP_NUM;

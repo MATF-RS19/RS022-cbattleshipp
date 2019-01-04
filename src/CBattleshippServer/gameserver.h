@@ -33,6 +33,8 @@ private Q_SLOTS:
 private:
     GameManager m_gm;
 
+    int m_playerIdGenerator = 0;
+
     void handlePlayRequest(QJsonObject & request);
     void handleChatRequest(QJsonObject & request);
     void handlePlayAgainRequest(QJsonObject & request);

@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/images">
-        <file>background.png</file>
         <file>background_pixelized.png</file>
     </qresource>
     <qresource prefix="/fonts">

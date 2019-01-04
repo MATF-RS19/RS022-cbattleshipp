@@ -401,11 +401,10 @@ void MainWindow::handleOpponentDisconnectedResponse(QJsonObject & response)
 
     }
     if (msgBox.clickedButton() == buttonNo) {
-        msg.insert("both_quit", 1);
         QJsonDocument doc(msg);
         m_player.m_socket->write(doc.toJson());
 
-        exit(EXIT_SUCCESS);
+        QApplication::quit();
     }
 }
 
@@ -600,7 +599,7 @@ void MainWindow::onQuitClicked()
     msgBox.exec();
 
     if (msgBox.clickedButton() == buttonYes) {
-        exit(EXIT_SUCCESS);
+        QApplication::quit();
     }
 
     if (msgBox.clickedButton() == buttonNo) {
@@ -677,15 +676,14 @@ void MainWindow::handleAttackResponse(QJsonObject & response)
                                                                                    QMessageBox::Yes | QMessageBox::No);
             if(replay == QMessageBox::Yes){
                 QJsonObject playAgain;
-                playAgain.insert("play_again2", 1);
+                playAgain.insert("play_again", 1);
+                playAgain.insert("player_type", m_player.m_playerType);
+                playAgain.insert("game_id", m_player.m_gameId);
                 QJsonDocument doc(playAgain);
                 m_player.m_socket->write(doc.toJson());
 
             }else{
-                QJsonObject quit;
-                quit.insert("quit2", 1);
-                QJsonDocument doc(quit);
-                m_player.m_socket->write(doc.toJson());
+                QApplication::quit();
             }
 
         }
@@ -713,19 +711,18 @@ void MainWindow::handleIfHitResponse(QJsonObject & response)
         ui->laOpponentShipsLeft->setText(QString::number(m_player.m_opponentShipsLeft));
 
         if(m_player.m_greatAttack == 30){
-            QMessageBox::StandardButton replay = QMessageBox::question(this,"Game over" ,"You won! Do you want to play again?",
+            QMessageBox::StandardButton replay = QMessageBox::question(this,"Game over" ,"VICTORY! Do you want to play again?",
                                                                                    QMessageBox::Yes | QMessageBox::No);
             if(replay == QMessageBox::Yes){
                 QJsonObject playAgain;
-                playAgain.insert("play_again2", 1);
+                playAgain.insert("play_again", 1);
+                playAgain.insert("player_type", m_player.m_playerType);
+                playAgain.insert("game_id", m_player.m_gameId);
                 QJsonDocument doc(playAgain);
                 m_player.m_socket->write(doc.toJson());
 
             }else{
-                QJsonObject quit;
-                quit.insert("quit2", 1);
-                QJsonDocument doc(quit);
-                m_player.m_socket->write(doc.toJson());
+                QApplication::quit();
             }
 
         }

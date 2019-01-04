@@ -16,10 +16,15 @@ class GameManager : public QObject
 
 public:
     explicit GameManager(QObject *parent = nullptr);
+    ~GameManager();
 
     void addToWaitingList(std::unique_ptr<Player> && player);
+
     Player *findIngamePlayer(int playerType, int gameId) const;
+    Player *findPlayer(qintptr sd) const;
+
     Player *opponent(int playerType, int gameId) const;
+    Player *opponent(qintptr sd) const;
 
 private:
     std::vector<std::unique_ptr<Player>> m_waitingPlayers;
@@ -31,6 +36,7 @@ private:
     void startGame();
 
     void removeWaitingPlayer();
+    void removePlayer(Player *player);
 
     QTcpSocket *opponentSocket(int playerType, int gameId);
     QTcpSocket *opponentSocket(qintptr socketDescriptor);

@@ -8,6 +8,14 @@
 
 #include <memory>
 
+enum PlayerType {
+    NEW = 0,
+    PLAYER1 = 1,
+    PLAYER2 = 2,
+    DELETED = 3,
+    PLAY_AGAIN = 4
+};
+
 class Player : public QObject
 {
     Q_OBJECT
@@ -27,11 +35,13 @@ private:
 
     QJsonObject m_ships;
 
-    // playerType values are 1 and 2 for ingame players and 0 for new players
-    uint8_t m_playerType = 0;
+    uint8_t m_playerType = PlayerType::NEW;
+
+    int m_playerId = 0;
 
     friend class GameServer;
     friend class GameManager;
 };
+
 
 #endif // PLAYER_H
