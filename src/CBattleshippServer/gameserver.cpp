@@ -10,7 +10,6 @@
 #include <memory>
 #include <iterator>
 
-
 GameServer::GameServer(QObject * parent)
     : QTcpServer(parent)
 {}
@@ -126,7 +125,7 @@ void GameServer::handlePlayRequest(QJsonObject & request)
     // set player name
     m_gm.m_waitingPlayers.at(m_gm.m_playerCounter - 1)->name(request.value("name").toString());
 
-    // if even number of players are on network, start a game
+    // if even number of players are connected to server, start a game
     if (m_gm.m_playerCounter % 2 == 0)
         m_gm.startGame();
 }
@@ -138,7 +137,7 @@ void GameServer::handleChatRequest(QJsonObject & request)
     msg.insert("chat_msg", request.value("chat_msg").toString());
     QJsonDocument doc(msg);
 
-    qDebug() << "Sending: " << doc.toJson();
+    qDebug() << "$ sending : " << doc.toJson();
 
     if (request.value("player_type").toInt() == PLAYER1) {
         auto opp = m_gm.opponent(PLAYER1, request.value("game_id").toInt());
@@ -243,6 +242,7 @@ void GameServer::handleReadyRequest(QJsonObject &request)
     }
 }
 
+
 void GameServer::handleHitRequest(QJsonObject & request)
 {
     auto player = m_gm.findIngamePlayer(request.value("playerType").toInt(), request.value("gameId").toInt());
@@ -267,8 +267,7 @@ void GameServer::handleHitRequest(QJsonObject & request)
     responseToOpponent.insert("x", request.value("x"));
     responseToOpponent.insert("y", request.value("y"));
 
-    if(opp->m_ships.value(QString::number(request.value("y").toInt()))[request.value("x").toInt()] == 1){
-
+    if(opp->m_ships.value(QString::number(request.value("y").toInt()))[request.value("x").toInt()] == 1) {
         //yah = you are hit
         responseToOpponent.insert("yah", 1);
 

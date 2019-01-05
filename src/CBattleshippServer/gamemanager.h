@@ -35,11 +35,10 @@ private:
 
     void startGame();
 
-    void removeWaitingPlayer();
     void removePlayer(Player *player);
 
-    QTcpSocket *opponentSocket(int playerType, int gameId);
-    QTcpSocket *opponentSocket(qintptr socketDescriptor);
+    GameManager(const GameManager& other);
+    GameManager& operator=(const GameManager &other);
 
     friend class GameServer;
 };
