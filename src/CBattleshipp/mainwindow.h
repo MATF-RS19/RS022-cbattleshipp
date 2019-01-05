@@ -48,6 +48,10 @@ private:
 
     bool m_selectedCell = false;
     bool m_opponentSelectedCell = false;
+    bool leftGrayCell(int size, int y, int x);
+    bool rightGrayCell(int size, int y, int x);
+    bool downGrayCell(int size, int y, int x);
+    bool upGrayCell(int size, int y, int x);
 
     int m_boatSize=0;
 

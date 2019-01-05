@@ -223,16 +223,16 @@ void MainWindow::onCellClick(int y, int x)
         }
         //first click
         else if(!ui->playerShips->item(y, x)->isSelected()){
-            if(x != 0){
+            if(x != 0 && x - m_boatSize + 1 >= 0 && leftGrayCell(m_boatSize, y, x)){
                 ui->playerShips->item(y, x - 1)->setBackground(Qt::gray);
             }
-            if(x != 9){
+            if(x != 9 && x + m_boatSize - 1 <= 9 && rightGrayCell(m_boatSize, y, x)){
                 ui->playerShips->item(y, x + 1)->setBackground(Qt::gray);
             }
-            if(y != 0){
+            if(y != 0 && y - m_boatSize + 1 >= 0 && upGrayCell(m_boatSize, y, x)){
                 ui->playerShips->item(y - 1, x)->setBackground(Qt::gray);
             }
-            if(y != 9){
+            if(y != 9 && y + m_boatSize - 1 <= 9 && downGrayCell(m_boatSize, y, x)){
                 ui->playerShips->item(y + 1, x)->setBackground(Qt::gray);
             }
             m_selectedCell = true;
@@ -382,6 +382,46 @@ void MainWindow::recieveServerMsg()
 
     if (response.contains("if_hit"))
         handleIfHitResponse(response);
+}
+
+bool MainWindow::leftGrayCell(int size, int y, int x)
+{
+    bool gray = true;
+    for(int i = 0; i < size; i++){
+        if(ui->playerShips->item(y, x - i)->isSelected())
+            gray = false;
+    }
+    return gray;
+}
+
+bool MainWindow::rightGrayCell(int size, int y, int x)
+{
+    bool gray = true;
+    for(int i = 0; i < size; i++){
+        if(ui->playerShips->item(y, x + i)->isSelected())
+            gray = false;
+    }
+    return gray;
+}
+
+bool MainWindow::downGrayCell(int size, int y, int x)
+{
+    bool gray = true;
+    for(int i = 0; i < size; i++){
+        if(ui->playerShips->item(y + i, x)->isSelected())
+            gray = false;
+    }
+    return gray;
+}
+
+bool MainWindow::upGrayCell(int size, int y, int x)
+{
+    bool gray = true;
+    for(int i = 0; i < size; i++){
+        if(ui->playerShips->item(y - i, x)->isSelected())
+            gray = false;
+    }
+    return gray;
 }
 
 void MainWindow::handleQuit()
